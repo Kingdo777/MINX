@@ -12,7 +12,7 @@ LoaderStart:
 	mov ebx,string
 	call put_string
 	hlt
-LoaderEnd
+LoaderEnd:
 ;打印字符串的相关的一系列函数
 ;输入：ah->高亮;[ds:ebx]->字符串地址（字符串必须以0结尾）
 ;输出：无

@@ -7,7 +7,7 @@ DASM	=ndisasm
 CC		=gcc
 LD		=ld
 
-ASMFLAGS 		= -I	"boot/include/ boot/lib/"
+ASMFLAGS 		= -I	"boot/"
 
 #This Program
 BOOT_TARGET	=	boot/boot.bin boot/loader.bin
