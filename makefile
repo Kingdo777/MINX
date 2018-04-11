@@ -20,7 +20,7 @@ build:
 	sudo mount -o loop a.img /mnt/floppy
 	sudo cp -fv boot/loader.bin /mnt/floppy
 	sudo umount /mnt/floppy
-	bochsdbg
+	bochs
 clean:
 	rf -f $(BOOT_TARGET)
 
@@ -32,7 +32,7 @@ boot/boot.bin:	boot/boot.asm boot/include/stdvar.inc boot/include/fat12_head_inf
 boot/loader.bin: boot/loader.asm
 	$(ASM)	$(ASMFLAGS) -o $@	$<
 	
-	#dd if=mbr.bin of=disk.img count=1 bs=512
-	#dd if=core.bin of=disk.img bs=512 seek=1
+#dd if=mbr.bin of=disk.img count=1 bs=512
+#dd if=core.bin of=disk.img bs=512 seek=1
 #	dd if=user.bin of=disk.img bs=512 seek=50
 #	dd if=diskdata.txt of=disk.img bs=512 seek=100
