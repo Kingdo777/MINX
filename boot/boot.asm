@@ -40,9 +40,9 @@ loopInSector:;在扇区中循环，扇区512字节，16个目录项
 	add di,32
 	pop ecx
 	loop loopInSector
-	mov ax,positionOfLoaderInMem
+	xor ax,ax
 	mov es,ax
-	xor bx,bx
+	mov bx,positionOfLoaderInMem
 	pop ecx
 	pop ax
 	inc ax
@@ -50,7 +50,7 @@ loopInSector:;在扇区中循环，扇区512字节，16个目录项
 	;打印错误信息，为了节省空间，直接调用13号中断
 	;清屏(为了方便直接切换活动页)
 	mov ax,0501h
-    int 0x10
+    	int 0x10
 	;打印字符串
 	xor ax,ax
 	mov es,ax
@@ -66,9 +66,9 @@ findLoader:;找到了loader.bin所在的项
 	add di,dirFirstClusOffset
 	mov ax,[es:di];获取文件的起始簇号
 	push ax;备份一下
-	mov bx,positionOfLoaderInMem
-	mov es,bx
 	xor bx,bx
+	mov es,bx
+	mov bx,positionOfLoaderInMem
 LoadeLoader:;加载Loader到内存
 	add ax,startSectorOfFile;转化为扇区号
 	call ReadSector
@@ -81,7 +81,7 @@ LoadeLoader:;加载Loader到内存
 	jmp LoadeLoader
 LoadeLoaderEnd:;加载结束
 ;将控制权转交给loader
-	jmp positionOfLoaderInMem
+	jmp 0:positionOfLoaderInMem
 ;函数：给定逻辑扇区号，从软盘中读取一个扇区并加载到相应内存中
 ;参数：al-->逻辑扇区号  es:bx-->内存地址
 %include	"lib/ReadSector.asm"

@@ -17,7 +17,7 @@ everything:	$(BOOT_TARGET)
 
 build:
 	dd if=boot/boot.bin of=a.img count=1 bs=512 conv=notrunc
-	sudo mount -o loop a.img /mnt/floppy
+	sudo mount -o loop -t msdos  a.img /mnt/floppy
 	sudo cp -fv boot/loader.bin /mnt/floppy
 	sudo umount /mnt/floppy
 	bochs

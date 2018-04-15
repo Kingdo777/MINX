@@ -30,8 +30,8 @@ mov dh,[es:bx]
 sub	bx,cx
 inc ax
 call ReadSector
-mov al,[es:bx]
-mov ah,dh
+mov ah,[es:bx]
+mov al,dh
 jmp calNextClus
 InOneSector:
 add bx,cx
@@ -41,10 +41,10 @@ calNextClus:
 pop dx;恢复簇号
 test dx,1
 jnz isOddNum;是奇数
-shr ax,4
+and ax,0x0fff
 jmp GetNextClusByFat_END;运算结束
 isOddNum:
-and ax,0x0fff
+shr ax,4
 GetNextClusByFat_END:
 pop edx
 pop ecx
