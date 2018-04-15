@@ -24,6 +24,7 @@ ReadSector:
 	and dh,1;设置磁头号
 	xor	dl,dl;设置驱动器号为A盘
 	mov ax,0x0201;设置读取扇区数为1，设置命令号为02
+	int 13h
 	pop dx
 	pop cx
 	pop bx

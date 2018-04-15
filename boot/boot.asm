@@ -5,7 +5,7 @@ org 0x7c00
 jmp BOOT_START
 nop;此指令必不可少
 %include "include/fat12_head_info.inc";引入Fat12的头部信息
-loaderName: db 	'loader  bin';中间是空格，因为fat12文件系统仅仅支持8字节文件名和3字节扩展名
+loaderName: db 	'LOADER  BIN';中间是空格，因为fat12文件系统仅仅支持8字节文件名和3字节扩展名
 errorInfo:	db	'no Loader'
 
 BOOT_START:
@@ -29,14 +29,14 @@ loopInRootDir:
 	push ecx
 	mov ecx,16
 	mov si,loaderName
-	xor di,di
+	mov di,positionOfLoaderInMem
 	push ecx
 loopInSector:;在扇区中循环，扇区512字节，16个目录项
 	mov ecx,11
 	repe cmpsb
 	jz findLoader
 	mov si,loaderName
-	and di,00100000b
+	and di,0xffe0
 	add di,32
 	pop ecx
 	loop loopInSector
@@ -62,7 +62,7 @@ loopInSector:;在扇区中循环，扇区512字节，16个目录项
 	mov ah,0x13
 	hlt
 findLoader:;找到了loader.bin所在的项
-	and di,00100000b
+	and di,0xffe0
 	add di,dirFirstClusOffset
 	mov ax,[es:di];获取文件的起始簇号
 	push ax;备份一下
