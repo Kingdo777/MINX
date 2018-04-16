@@ -22,16 +22,16 @@ BOOT_START:
 	;从软盘中寻找loade.bin
 	mov bx,positionOfLoaderInMem
 	mov ax,startSectorOfRootDir
-	push ax
 	mov ecx,SectorsOfRootDir
 loopInRootDir:
+	push ax
 	call ReadSector
 	push ecx
 	mov ecx,16
 	mov si,loaderName
 	mov di,positionOfLoaderInMem
-	push ecx
 loopInSector:;在扇区中循环，扇区512字节，16个目录项
+	push ecx
 	mov ecx,11
 	repe cmpsb
 	jz findLoader
@@ -56,10 +56,12 @@ loopInSector:;在扇区中循环，扇区512字节，16个目录项
 	mov es,ax
 	mov bp,errorInfo
 	mov cx,9
-	xor	dx,dx
+	xor dx,dx
 	mov bh,01h
 	mov bl,04h
 	mov ah,0x13
+	int 10h
+
 	hlt
 findLoader:;找到了loader.bin所在的项
 	and di,0xffe0

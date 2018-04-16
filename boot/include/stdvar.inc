@@ -1,7 +1,7 @@
 ;我是全局头文件，里面都是一些常量或者宏的定义等等
 
-positionOfLoaderInMem	equ	0x9000	;Loader加载到内存的位置（使用平坦模型）
-
+positionOfLoaderInMem		equ	0x9000	;Loader加载到内存的位置（使用平坦模型）
+positionOfKernelFileInMem	equ	0x8000	;kernel.bin加载到内存的位置（使用平坦模型）
 ;段描述符相关
 ;				G_D/B_L_AVL_offset_P_DPL_S_TYPE
 RWG_data 	equ 1__1__0__0___0000__1_00__1_0010B 	;32位可读可写大粒度数据段
