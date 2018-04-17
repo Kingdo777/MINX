@@ -1,6 +1,7 @@
 ;bootLoader
 %include "include/stdvar.inc";引入常用的常量定义
-%include "include/pm.inc";引入常用的常量定义
+%include "include/pm.inc";引入保护模式的常用宏以及常量
+%include "lib/getMemARDS.asm";宏函数
 org	positionOfLoaderInMem
 jmp	LoaderStart
 ;数据区
@@ -8,7 +9,16 @@ dataSection:
 	%include 		"include/fat12_head_info.inc";引入Fat12的头部信息
 	kernelFileName		db	'KERNEL  BIN'
 	noKernelFileerror	db	'No Kernel!'
-	string			db	`Welcome To PM!`,0
+	string			db	`Welcome To PM!\n`,0
+;--------------------MEM信息buf---------------------------------------------------------------------------------------
+ARDS_BUF times	400	db 0;每个ARDS大小为20字节，这里预留20ARDS的空间
+ARDS_NUMBER		dw 0;
+getARDS_errorInfo	db "get ARDS wrong"
+errorInfoLen		equ	$-getARDS_errorInfo
+;--------------------栈空间-------------------------------------------------------------------------------------------
+BaseOfStack:
+times 	1024	db	0
+TopOfStack:
 ;--------------------gdt部分------------------------------------------------------------------------------------------
 ;					段地址		段界限		属性
 	GDT_BEGIN:	Descriptor	0		,0		,0				;空描述符
@@ -30,6 +40,9 @@ LoaderStart:
 ; 加载kernel.bin到内存	
 %include	"include/loadKernel.asm"
 ;#############################################################################################
+;获取内存信息，因为需要用到int 15h中断，因此要在进入保护模式之前调用
+getMemARDS	ARDS_BUF,ARDS_NUMBER,getARDS_errorInfo,errorInfoLen
+;#############################################################################################
 ;进入保护模式并开启分页
 	;加载gdt
 	lgdt	[GDTPTR]
@@ -45,22 +58,6 @@ LoaderStart:
 	mov cr0,eax
 	;清空流水线，串行化执行代码
 	jmp dword selector_CORE_CODE_4G:flush
-bits	32
-flush:;此处的物理地址：0x0000000000009131
-	mov	ax,selector_CORE_DATA_4G
-	mov	ds,ax
-	mov	es,ax
-	mov	gs,ax
-	mov	fs,ax
-	mov	ss,ax
-	mov	esp,0x7c00
-
-	mov 	ah,04h
-	mov 	ebx,string
-	call 	put_string		
-
-	hlt
-bits	16
 ;函数：给定逻辑扇区号，从软盘中读取一个扇区并加载到相应内存中
 ;参数：al-->逻辑扇区号  es:bx-->内存地址
 %include	"lib/ReadSector.asm"
@@ -71,7 +68,25 @@ bits	16
 ;函数：关闭软驱马达
 ;无参数和返回值
 %include	"lib/KillMotor.asm"
+
+;-------------------32位保护模式代码-------------------------------------------------------
+section .code_32
 bits	32
+flush:;此处的物理地址：0x0000000000009132
+	mov	ax,selector_CORE_DATA_4G
+	mov	ds,ax
+	mov	es,ax
+	mov	gs,ax
+	mov	fs,ax
+	mov	ss,ax
+	mov	esp,TopOfStack
+
+	mov 	ah,04h
+	mov 	ebx,string
+	call 	put_string		
+	mov 	ebx,string
+	call 	put_string
+	hlt
 ;打印字符串的相关的一系列函数
 ;输入：ah->高亮;[ebx]->字符串地址（字符串必须以0结尾）
 ;输出：无

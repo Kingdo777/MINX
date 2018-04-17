@@ -8,10 +8,10 @@ push ebx
 _put_string_begin:
 mov al,[ebx]
 cmp al,0
-je _put_string_begin
+je _put_string_end
 call put_char
 inc ebx
-jmp put_string
+jmp _put_string_begin
 _put_string_end:
 pop ebx
 pop eax
