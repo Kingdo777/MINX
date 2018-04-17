@@ -1,19 +1,20 @@
 ;打印字符串的相关的一系列函数
 ;输入：ah->高亮;[ebx]->字符串地址（字符串必须以0结尾）
 ;输出：无
-graphicsMemoryPosition	equ	0xB800 
+graphicsMemoryPosition	equ	0xB8000
 put_string:
 push eax
 push ebx
+_put_string_begin:
 mov al,[ebx]
 cmp al,0
-je _put_string_end
+je _put_string_begin
 call put_char
 inc ebx
 jmp put_string
 _put_string_end:
-push ebx
-push eax
+pop ebx
+pop eax
 ret
 ;输入：ah->高亮;al->要输出的ascII
 put_char:
