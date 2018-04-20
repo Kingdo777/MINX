@@ -2,6 +2,7 @@
 %include "include/stdvar.inc";引入常用的常量定义
 %include "include/pm.inc";引入保护模式的常用宏以及常量
 %include "lib/getMemARDS.asm";宏函数
+%include "lib/calMemSize.asm";宏函数
 org	positionOfLoaderInMem
 jmp	LoaderStart
 ;数据区
@@ -9,19 +10,26 @@ dataSection:
 	%include 		"include/fat12_head_info.inc";引入Fat12的头部信息
 	kernelFileName		db	'KERNEL  BIN'
 	noKernelFileerror	db	'No Kernel!'
-	string			db	`Welcome To PM!\n`,0
+	string			db	`Welcome To PM&PG!\n`,0
 ;--------------------MEM信息buf---------------------------------------------------------------------------------------
-ARDS_BUF times	400	db 0;每个ARDS大小为20字节，这里预留20ARDS的空间
-ARDS_NUMBER		dw 0;
-getARDS_errorInfo	db "get ARDS wrong"
-errorInfoLen		equ	$-getARDS_errorInfo
+ARDS_BUF times	400		db 0;每个ARDS大小为20字节，这里预留20ARDS的空间
+ARDS_NUMBER				dd 0;
+getARDS_errorInfo		db "get ARDS wrong"
+errorInfoLen			equ	$-getARDS_errorInfo
+MemSize					dd	0
+ARDStruct:;ARDS对应的结构体
+	ARDS_BaseAddrLow:		dd	0
+	ARDS_BaseAddrHigh:		dd	0
+	ARDS_LengthLow:			dd	0
+	ARDS_LengthHigh:		dd	0
+	ARDS_Type:				dd	0
 ;--------------------栈空间-------------------------------------------------------------------------------------------
 BaseOfStack:
 times 	1024	db	0
 TopOfStack:
 ;--------------------gdt部分------------------------------------------------------------------------------------------
 ;					段地址		段界限		属性
-	GDT_BEGIN:	Descriptor	0		,0		,0				;空描述符
+	GDT_BEGIN:	Descriptor		0		,0		,0				;空描述符
 	CORE_DATA_4G:	Descriptor	0		,0fffffh	,DA_DRW|DA_32|DA_LIMIT_4K	;内核数据段
 	CORE_CODE_4G:	Descriptor	0		,0fffffh	,DA_CR|DA_32|DA_LIMIT_4K	;内核代码段
 ;gdt存储信息
@@ -32,7 +40,7 @@ TopOfStack:
 	selector_CORE_DATA_4G	equ	CORE_DATA_4G-GDT_BEGIN
 	selector_CORE_CODE_4G	equ	CORE_CODE_4G-GDT_BEGIN
 ;---------------------------------------------------------------------------------------------------------------------
-LoaderStart:
+LoaderStart:;物理地址0x0000000000009621
 	mov ax,cs
 	mov ds,ax
 	mov es,ax
@@ -40,8 +48,9 @@ LoaderStart:
 ; 加载kernel.bin到内存	
 %include	"include/loadKernel.asm"
 ;#############################################################################################
-;获取内存信息，因为需要用到int 15h中断，因此要在进入保护模式之前调用
+;获取内存信息，因为需要用到int 15h中断，因此要在进入保护模式之前调用;物理地址0x00000000000096b5
 getMemARDS	ARDS_BUF,ARDS_NUMBER,getARDS_errorInfo,errorInfoLen
+;计算内存大小，并根据内存大小进行分页
 ;#############################################################################################
 ;进入保护模式并开启分页
 	;加载gdt
@@ -72,7 +81,7 @@ getMemARDS	ARDS_BUF,ARDS_NUMBER,getARDS_errorInfo,errorInfoLen
 ;-------------------32位保护模式代码-------------------------------------------------------
 section .code_32
 bits	32
-flush:;此处的物理地址：0x0000000000009132
+flush:;此处的物理地址：
 	mov	ax,selector_CORE_DATA_4G
 	mov	ds,ax
 	mov	es,ax
@@ -80,6 +89,49 @@ flush:;此处的物理地址：0x0000000000009132
 	mov	fs,ax
 	mov	ss,ax
 	mov	esp,TopOfStack
+;根据ARDS获取可用内存的大小
+calMemSize  ARDS_BUF,ARDStruct,ARDS_BaseAddrLow,ARDS_LengthLow,ARDS_Type,MemSize,ARDS_NUMBER
+;下面开始设置页表和页目录，并开启分页
+	xor		edx,edx
+	mov 	eax,[MemSize]
+	mov		ebx,4*1024*1024
+	div		ebx
+	test	edx,edx
+	jz		@1
+	inc		eax;余数不为0,则多创建一个页表
+@1:
+	push	eax;
+	mov		ecx,eax
+	mov		edi,positionOfPDTFileInMem
+	mov		eax,positionOfPGTFileInMem|PG_P|PG_RWW|PG_USS
+@2:;下面三行代码是对PDT的初始化
+	stosd
+	add		eax,4*1024
+	jmp		@2
+	;下面开始初始化页表
+	pop		eax
+	mov		ebx,1024
+	mul		ebx;计算页表项的数目，已知页表项最多也就1024×1024，所以不会超出32位寄存器
+	mov		ecx,eax
+	mov		edi,positionOfPGTFileInMem
+	xor		eax,eax
+	mov		eax,PG_P|PG_RWW|PG_USS
+@3:;
+	stosd
+	add		eax,4*1024
+	jmp		@2	
+;PGT、PDT初始化完毕，下面开启分页
+	mov		eax,positionOfPDTFileInMem
+	mov		cr3,eax
+	mov		eax,cr0
+	or		eax,80000000h
+	mov		cr0,eax
+	jmp		pg_flush
+pg_flush:
+
+
+
+
 
 	mov 	ah,04h
 	mov 	ebx,string

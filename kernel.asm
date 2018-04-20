@@ -1,6 +1,7 @@
 section .data
-    string  db  `hello`
+	string  db  `hello`
 section .text
 global  _start
 _start:
-    hlt
+	hlt
+	

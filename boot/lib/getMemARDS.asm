@@ -1,5 +1,5 @@
 ;宏，获取内存ARDS，参数3个，结构数目(%1)、用于存放结构信息的缓冲区地址(%2)、错误信息(%3)、错误信息长度(%4)
-%macro getMemARDS 3
+%macro getMemARDS 4
 	mov	ebx,0
 	mov	di,%2
 .loop:
