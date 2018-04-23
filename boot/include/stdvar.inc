@@ -2,8 +2,12 @@
 
 positionOfLoaderInMem		equ	0x8000		;Loader加载到内存的位置（使用平坦模型）
 baseOfKernelFileInMem		equ	0x1000		;kernel.bin加载到内存的位置段地址（使用多段模型）
+positionOfKernelFileInMem	equ	0x10000		;kernel.bin加载到内存的位置（使用平坦模型）
 positionOfPDTFileInMem		equ	0x100000	;PDT加载到内存的位置（使用平坦模型）
 positionOfPGTFileInMem		equ	0x101000	;PGT加载到内存的位置（使用平坦模型）
+
+entryAddrOfKernel			equ	0x30400		;kernel的入口地址，也是链接内核指令的参数值
+
 ;段描述符相关
 ;				G_D/B_L_AVL_offset_P_DPL_S_TYPE
 RWG_data 	equ 1__1__0__0___0000__1_00__1_0010B 	;32位可读可写大粒度数据段

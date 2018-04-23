@@ -10,7 +10,6 @@ dataSection:
 	%include 		"include/fat12_head_info.inc";引入Fat12的头部信息
 	kernelFileName		db	'KERNEL  BIN'
 	noKernelFileerror	db	'No Kernel!'
-	string			db	`Welcome To PM&PG!\n`,0
 ;--------------------MEM信息buf---------------------------------------------------------------------------------------
 ARDS_BUF times	400		db 0;每个ARDS大小为20字节，这里预留20ARDS的空间
 ARDS_NUMBER				dd 0;
@@ -128,17 +127,29 @@ calMemSize  ARDS_BUF,ARDStruct,ARDS_BaseAddrLow,ARDS_LengthLow,ARDS_Type,MemSize
 	mov		cr0,eax
 	jmp		pg_flush
 pg_flush:
-
-
-
-
-
-	mov 	ah,04h
-	mov 	ebx,string
-	call 	put_string		
-	mov 	ebx,string
-	call 	put_string
-	hlt
+;######################################################################################################
+;根据elf head以及programe head的信息，将kernel相应的段进行重新安排
+	mov		cx,[positionOfKernelFileInMem+2ch];获取programe head个数
+	movzx	ecx,cx
+	mov		ebx,[positionOfKernelFileInMem+1ch];获取programe head偏移
+	add		ebx,positionOfKernelFileInMem;获取programe head地址
+@4:
+	push	ecx
+	mov		eax,[ebx]
+	cmp		eax,0
+	jz		@5
+	mov		ecx,[ebx+10h];段大小
+	mov		esi,[ebx+04h];在文件中的偏移
+	add		esi,positionOfKernelFileInMem
+	mov		edi,[ebx+08h];在内存中的偏移
+	rep		movsb
+@5:
+	add		ebx,20h
+	pop		ecx
+	loop	@4
+;######################################################################################################
+;转交控制权，进入操作系统
+jmp	entryAddrOfKernel
 ;打印字符串的相关的一系列函数
 ;输入：ah->高亮;[ebx]->字符串地址（字符串必须以0结尾）
 ;输出：无
