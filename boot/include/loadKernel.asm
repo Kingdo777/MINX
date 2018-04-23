@@ -3,7 +3,9 @@
 	xor dl,dl
 	int 0x13
 	;从软盘中寻找kernel.bin
-	mov bx,positionOfKernelFileInMem
+	mov bx,baseOfKernelFileInMem
+	mov es,bx
+	xor bx,bx
 	mov ax,startSectorOfRootDir
 	mov ecx,SectorsOfRootDir
 loopInRootDir:
@@ -12,7 +14,9 @@ loopInRootDir:
 	push ecx
 	mov ecx,16
 	mov si,kernelFileName
-	mov di,positionOfKernelFileInMem
+	mov bx,baseOfKernelFileInMem
+	mov es,bx
+	xor di,di
 loopInSector:;在扇区中循环，扇区512字节，16个目录项
 	push ecx
 	mov ecx,11
@@ -23,9 +27,9 @@ loopInSector:;在扇区中循环，扇区512字节，16个目录项
 	add di,32
 	pop ecx
 	loop loopInSector
-	xor ax,ax
-	mov es,ax
-	mov bx,positionOfKernelFileInMem
+	mov bx,baseOfKernelFileInMem
+	mov es,bx
+	xor bx,bx
 	pop ecx
 	pop ax
 	inc ax
@@ -50,9 +54,9 @@ findKernelFile:;找到了kernel.bin所在的项
 	add di,dirFirstClusOffset
 	mov ax,[es:di];获取文件的起始簇号
 	push ax;备份一下
-	xor bx,bx
+	mov bx,baseOfKernelFileInMem
 	mov es,bx
-	mov bx,positionOfKernelFileInMem
+	xor bx,bx
 LoadeKernelFile:;加载Loader到内存
 	add ax,startSectorOfFile;转化为扇区号
 	call ReadSector

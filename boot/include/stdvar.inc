@@ -1,7 +1,7 @@
 ;我是全局头文件，里面都是一些常量或者宏的定义等等
 
-positionOfLoaderInMem		equ	0x9000		;Loader加载到内存的位置（使用平坦模型）
-positionOfKernelFileInMem	equ	0x8000		;kernel.bin加载到内存的位置（使用平坦模型）
+positionOfLoaderInMem		equ	0x8000		;Loader加载到内存的位置（使用平坦模型）
+baseOfKernelFileInMem		equ	0x1000		;kernel.bin加载到内存的位置段地址（使用多段模型）
 positionOfPDTFileInMem		equ	0x100000	;PDT加载到内存的位置（使用平坦模型）
 positionOfPGTFileInMem		equ	0x101000	;PGT加载到内存的位置（使用平坦模型）
 ;段描述符相关

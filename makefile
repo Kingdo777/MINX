@@ -3,13 +3,13 @@
 #program,flags,etc
 
 ASM		=nasm
-DASM		=ndisasm
+DASM	=ndisasm
 CC		=gcc
 LD		=ld
 
-ASMFLAGS	= -I "boot/"
+ASMFLAGS		= -I "boot/"
 ASMFLAGS_ELF	= -f elf
-LDFLAGS		= -s	-m elf_i386	
+LDFLAGS			= -s	-Ttext 0x30400	-m elf_i386	
 
 #This Program
 BOOT_TARGET	=	boot/boot.bin boot/loader.bin kernel.bin
