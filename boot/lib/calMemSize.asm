@@ -4,17 +4,18 @@
 	mov		esi,%1
 	mov		edi,%2
 	mov		ecx,[%7]
+	cld
 calMemSize_loop:
 	push	ecx
 	mov		ecx,20
-	movsb
+	rep		movsb 
 	cmp		dword	[%5],1
 	jne		calMemSize_next
 	mov		eax,[%3]
 	add		eax,dword	[%4]
 	mov		[%6],eax
 calMemSize_next:
-	add		esi,20
+	mov		edi,%2;esi和edi都自动增加20,所以esi刚好是正确的数值，而edi需要重新赋值
 	pop		ecx
 	loop	calMemSize_loop
 %endmacro

@@ -40,7 +40,7 @@ TopOfStack:
 	selector_CORE_DATA_4G	equ	CORE_DATA_4G-GDT_BEGIN
 	selector_CORE_CODE_4G	equ	CORE_CODE_4G-GDT_BEGIN
 ;---------------------------------------------------------------------------------------------------------------------
-LoaderStart:;物理地址0x0000000000009621
+LoaderStart:
 	mov ax,cs
 	mov ds,ax
 	mov es,ax
@@ -49,7 +49,7 @@ LoaderStart:;物理地址0x0000000000009621
 %include	"include/loadKernel.asm"
 ;#############################################################################################
 ;获取内存信息，因为需要用到int 15h中断，因此要在进入保护模式之前调用;物理地址0x00000000000096b5
-getMemARDS	ARDS_BUF,ARDS_NUMBER,getARDS_errorInfo,errorInfoLen
+getMemARDS	ARDS_NUMBER,ARDS_BUF,getARDS_errorInfo,errorInfoLen
 ;计算内存大小，并根据内存大小进行分页
 ;#############################################################################################
 ;进入保护模式并开启分页
@@ -107,7 +107,7 @@ calMemSize  ARDS_BUF,ARDStruct,ARDS_BaseAddrLow,ARDS_LengthLow,ARDS_Type,MemSize
 @2:;下面三行代码是对PDT的初始化
 	stosd
 	add		eax,4*1024
-	jmp		@2
+	loop	@2
 	;下面开始初始化页表
 	pop		eax
 	mov		ebx,1024
@@ -119,7 +119,7 @@ calMemSize  ARDS_BUF,ARDStruct,ARDS_BaseAddrLow,ARDS_LengthLow,ARDS_Type,MemSize
 @3:;
 	stosd
 	add		eax,4*1024
-	jmp		@2	
+	loop	@3	
 ;PGT、PDT初始化完毕，下面开启分页
 	mov		eax,positionOfPDTFileInMem
 	mov		cr3,eax

@@ -1,4 +1,4 @@
-;宏，获取内存ARDS，参数3个，结构数目(%1)、用于存放结构信息的缓冲区地址(%2)、错误信息(%3)、错误信息长度(%4)
+;宏，获取内存ARDS，参数3个，结构数目ARDS_NUMBER(%1)、用于存放结构信息的缓冲区地址ARDS_BUF(%2)、错误信息getARDS_errorInfo(%3)、错误信息长度errorInfoLen(%4)
 %macro getMemARDS 4
 	mov	ebx,0
 	mov	di,%2
@@ -9,7 +9,7 @@
 	int	15h
 	jc	getARDS_wrong
 	add	di,20
-	inc	word	[%1]
+	inc	dword	[%1]
 	cmp	ebx,0
 	jne	.loop
 	jmp	getARDS_success

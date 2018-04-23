@@ -32,7 +32,7 @@ all: clean everything build
 boot/boot.bin:	boot/boot.asm boot/include/stdvar.inc boot/include/fat12_head_info.inc boot/lib/ReadSector.asm boot/lib/GetNextClusByFat.asm
 	$(ASM)	$(ASMFLAGS)	-o $@	$<
 	
-boot/loader.bin: boot/loader.asm boot/include/stdvar.inc boot/include/fat12_head_info.inc  boot/include/pm.inc boot/include/loadKernel.asm boot/lib/ReadSector.asm boot/lib/put_string.asm boot/lib/GetNextClusByFat.asm boot/lib/KillMotor.asm 
+boot/loader.bin: boot/loader.asm boot/include/stdvar.inc boot/include/fat12_head_info.inc  boot/include/pm.inc boot/include/loadKernel.asm boot/lib/ReadSector.asm boot/lib/put_string.asm boot/lib/GetNextClusByFat.asm boot/lib/KillMotor.asm boot/lib/calMemSize.asm boot/lib/getMemARDS.asm
 	$(ASM)	$(ASMFLAGS)	-o $@	$<
 kernel.bin:kernel.o
 	$(LD)	$(LDFLAGS)	-o $@	$^
