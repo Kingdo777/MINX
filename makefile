@@ -36,11 +36,5 @@ boot/loader.bin: boot/loader.asm boot/include/stdvar.inc boot/include/fat12_head
 	$(ASM)	$(ASMFLAGS)	-o $@	$<
 kernel.bin:kernel.o
 	$(LD)	$(LDFLAGS)	-o $@	$^
-kernel.o:kernel.asm
+kernel.o:kernel/kernel.asm lib/put_string
 	$(ASM)	$(ASMFLAGS_ELF)	-o $@	$<
-
-	
-#dd if=mbr.bin of=disk.img count=1 bs=512
-#dd if=core.bin of=disk.img bs=512 seek=1
-#	dd if=user.bin of=disk.img bs=512 seek=50
-#	dd if=diskdata.txt of=disk.img bs=512 seek=100

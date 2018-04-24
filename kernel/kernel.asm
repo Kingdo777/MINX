@@ -1,5 +1,14 @@
+;导入函数
+extern	cstart
+;导入全局变量
+extern	gdt_ptr
+
 section .data
-	string  db  `hello world!\nI am MINX!`,0
+	string  db  `hello world!\nI am MINX`0
+section	.bss
+StackSpace	times	db	2*1024
+StackTop	;栈顶
+
 section .text
 global  _start
 _start:
@@ -7,6 +16,7 @@ _start:
 	mov 	ebx,string
 	call 	put_string		
 	hlt
+
 
 ;------------------------------func------------------------------------------------------
 ;打印字符串的相关的一系列函数
