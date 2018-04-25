@@ -1,3 +1,5 @@
+.vscode
 a.img
 *.bin
 bochsout.txt
+*.o
