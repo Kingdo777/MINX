@@ -9,14 +9,15 @@ LD		=ld
 
 ASMFLAGS		= -I "boot/"
 ASMFLAGS_ELF	= -f elf
-LDFLAGS			= -s	-Ttext 0x30400	-m elf_i386	
-CCFLAGS			= -m32	-c  -fno-builtin
+LDFLAGS			= -s -Ttext 0x30400	-m elf_i386	
+CCFLAGS			= -m32	-c  -fno-builtin -fno-stack-protector -I "include/"
 
 #This Program
-BOOT_TARGET	=	boot/boot.bin boot/loader.bin kernel.bin
-
+BOOT_TARGET		=	boot/boot.bin boot/loader.bin
+KERNEL_TARGET	=	kernel.bin
+OBJ_TARGET		=	kernel.o start.o mystring.o protect.o kliba.o interrupt.o
 #default starting positong
-everything:	$(BOOT_TARGET)
+everything:	$(BOOT_TARGET) $(KERNEL_TARGET)
 
 build:
 	dd if=boot/boot.bin of=a.img count=1 bs=512 conv=notrunc
@@ -26,7 +27,7 @@ build:
 	sudo umount /mnt/floppy
 	bochs
 clean:
-	sudo rm -rf $(BOOT_TARGET) ./*.o
+	sudo rm -rf $(BOOT_TARGET) $(KERNEL_TARGET) $(OBJ_TARGET)
 
 all: clean everything build
 
@@ -36,11 +37,17 @@ boot/boot.bin:	boot/boot.asm boot/include/stdvar.inc boot/include/fat12_head_inf
 boot/loader.bin: boot/loader.asm boot/include/stdvar.inc boot/include/fat12_head_info.inc  boot/include/pm.inc boot/include/loadKernel.asm boot/lib/ReadSector.asm boot/lib/put_string.asm boot/lib/GetNextClusByFat.asm boot/lib/KillMotor.asm boot/lib/calMemSize.asm boot/lib/getMemARDS.asm
 	$(ASM)	$(ASMFLAGS)	-o $@	$<
 
-kernel.bin:kernel.o	start.o mystring.o
+kernel.bin:$(OBJ_TARGET)
 	$(LD)	$(LDFLAGS)	-o $@	$^
-kernel.o:kernel/kernel.asm lib/mystring.asm
+kernel.o:kernel/kernel.asm
 	$(ASM)	$(ASMFLAGS_ELF)	-o $@	$<
-start.o:kernel/start.c	include/const.h include/protect.h include/type.h
+start.o:kernel/start.c	include/const.h include/protect.h 
 	$(CC)	$(CCFLAGS)	-o $@	$<
 mystring.o:lib/mystring.asm
 	$(ASM)	$(ASMFLAGS_ELF)	-o $@	$<
+protect.o:lib/protect.c
+	$(CC)	$(CCFLAGS)	-o $@	$<
+kliba.o:lib/kliba.asm
+	$(ASM)	$(ASMFLAGS_ELF)	-o $@	$<
+interrupt.o:lib/interrupt.c
+	$(CC)	$(CCFLAGS)	-o $@	$<

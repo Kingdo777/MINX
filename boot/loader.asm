@@ -34,7 +34,7 @@ TopOfStack:
 ;gdt存储信息
 	GDTLEN	equ	$-GDT_BEGIN
 	GDTPTR	dw	GDTLEN-1
-		dd	GDT_BEGIN	
+			dd	GDT_BEGIN	
 ;gdt选择子
 	selector_CORE_DATA_4G	equ	CORE_DATA_4G-GDT_BEGIN
 	selector_CORE_CODE_4G	equ	CORE_CODE_4G-GDT_BEGIN
