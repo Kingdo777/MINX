@@ -6,6 +6,9 @@ out_port:
     mov     al,[esp+8]
     out     dx,al
     nop     ;一点延迟
+    nop
+    nop
+    nop
     ret
 
 ;uint8_t in_port(uint16_t port)
@@ -13,4 +16,8 @@ in_port:
     mov     dx,[esp+4]
     xor     eax,eax
     in      al,dx
+    nop     ;一点延迟
+    nop
+    nop
+    nop
     ret

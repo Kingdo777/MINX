@@ -15,7 +15,7 @@ CCFLAGS			= -m32	-c  -fno-builtin -fno-stack-protector -I "include/"
 #This Program
 BOOT_TARGET		=	boot/boot.bin boot/loader.bin
 KERNEL_TARGET	=	kernel.bin
-OBJ_TARGET		=	kernel.o start.o mystring.o protect.o kliba.o interrupt.o
+OBJ_TARGET		=	kernel.o start.o mystring.o protect.o kliba.o interrupt.o mystring_c.o
 #default starting positong
 everything:	$(BOOT_TARGET) $(KERNEL_TARGET)
 
@@ -31,23 +31,31 @@ clean:
 
 all: clean everything build
 
-boot/boot.bin:	boot/boot.asm boot/include/stdvar.inc boot/include/fat12_head_info.inc boot/lib/ReadSector.asm boot/lib/GetNextClusByFat.asm
+boot/boot.bin:	boot/boot.asm boot/include/stdvar.inc boot/include/fat12_head_info.inc \
+boot/lib/ReadSector.asm boot/lib/GetNextClusByFat.asm
 	$(ASM)	$(ASMFLAGS)	-o $@	$<
 	
-boot/loader.bin: boot/loader.asm boot/include/stdvar.inc boot/include/fat12_head_info.inc  boot/include/pm.inc boot/include/loadKernel.asm boot/lib/ReadSector.asm boot/lib/put_string.asm boot/lib/GetNextClusByFat.asm boot/lib/KillMotor.asm boot/lib/calMemSize.asm boot/lib/getMemARDS.asm
+boot/loader.bin: boot/loader.asm boot/include/stdvar.inc boot/include/fat12_head_info.inc  \
+boot/include/pm.inc boot/include/loadKernel.asm boot/lib/ReadSector.asm boot/lib/put_string.asm \
+boot/lib/GetNextClusByFat.asm boot/lib/KillMotor.asm boot/lib/calMemSize.asm boot/lib/getMemARDS.asm
 	$(ASM)	$(ASMFLAGS)	-o $@	$<
 
 kernel.bin:$(OBJ_TARGET)
 	$(LD)	$(LDFLAGS)	-o $@	$^
 kernel.o:kernel/kernel.asm
 	$(ASM)	$(ASMFLAGS_ELF)	-o $@	$<
-start.o:kernel/start.c	include/const.h include/protect.h 
+start.o:kernel/start.c include/const.h include/protect.h include/const.h \
+ include/mystring.h include/interrupt.h
 	$(CC)	$(CCFLAGS)	-o $@	$<
 mystring.o:lib/mystring.asm
 	$(ASM)	$(ASMFLAGS_ELF)	-o $@	$<
-protect.o:lib/protect.c
+protect.o:lib/protect.c include/const.h include/protect.h \
+ include/const.h include/mystring.h
 	$(CC)	$(CCFLAGS)	-o $@	$<
 kliba.o:lib/kliba.asm
 	$(ASM)	$(ASMFLAGS_ELF)	-o $@	$<
-interrupt.o:lib/interrupt.c
+interrupt.o:lib/interrupt.c include/const.h include/kliba.h \
+ include/mystring.h
+	$(CC)	$(CCFLAGS)	-o $@	$<
+mystring_c.o:lib/mystring_c.c include/const.h
 	$(CC)	$(CCFLAGS)	-o $@	$<

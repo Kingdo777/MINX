@@ -1,14 +1,18 @@
+selector_CORE_DATA_4G	equ	08h
+selector_CORE_CODE_4G	equ	10h
 ;导入函数
 extern	cstart
 extern	puts
 extern	exception_handler
+extern	hardWareInt_handler
+extern	breakPointDebug
 ;导入全局变量
 extern	gdt_ptr
 extern	idt_ptr
 
 section .data
 	string  	db  `hello world!\nI am MINX\n`,0
-	string1  	db  `SUCCESS!`,0
+	string1  	db  `SUCCESS!\n`,0
 	StackSpace	times	2*1024	db	0	
 	StackTop:	;栈顶指针
 
@@ -31,6 +35,22 @@ global	stack_exception
 global	general_protection
 global	page_fault
 global	copr_error
+global  hwint00
+global  hwint01
+global  hwint02
+global  hwint03
+global  hwint04
+global  hwint05
+global  hwint06
+global  hwint07
+global  hwint08
+global  hwint09
+global  hwint10
+global  hwint11
+global  hwint12
+global  hwint13
+global  hwint14
+global  hwint15
 
 _start:
 	push	string
@@ -42,8 +62,11 @@ _start:
 	call	cstart
 	lgdt	[gdt_ptr]
 	lidt	[idt_ptr]
-
-	ud2
+	jmp		selector_CORE_CODE_4G:flush
+flush:
+	sti
+	;ud2
+	;int 	0x33
 
 	push	string1
 	push	03h
@@ -51,9 +74,13 @@ _start:
 
 	hlt
 	hlt
+	hlt
+	hlt
+	hlt
+	hlt
 
 
-; 中断和异常 -- 异常
+;  异常
 divide_error:
 	push	0xFFFFFFFF	; no err code
 	push	0		; vector_no	= 0
@@ -66,7 +93,7 @@ nmi:
 	push	0xFFFFFFFF	; no err code
 	push	2		; vector_no	= 2
 	jmp	exception
-breakpoint_exception:
+breakpoint_exception:;断点调试，我们让他打印栈的信息
 	push	0xFFFFFFFF	; no err code
 	push	3		; vector_no	= 3
 	jmp	exception
@@ -116,4 +143,66 @@ copr_error:
 exception:
 	call	exception_handler
 	add	esp, 4*2	; 让栈顶指向 EIP，堆栈中从顶向下依次是：EIP、CS、EFLAGS
-	hlt
+	iret
+
+
+;  硬件中断
+; ---------------------------------
+%macro  hwint    1
+    push    %1
+    call    hardWareInt_handler
+    add     esp, 4
+    iret
+%endmacro
+; ---------------------------------
+
+
+hwint00:hwint    0; Interrupt routine for irq 0 (the clock).
+hwint01:hwint    1; Interrupt routine for irq 1 (keyboard)
+hwint02:hwint    2; Interrupt routine for irq 2 (cascade!)
+hwint03:hwint    3; Interrupt routine for irq 3 (second serial)
+hwint04:hwint    4; Interrupt routine for irq 4 (first serial)
+hwint05:hwint    5; Interrupt routine for irq 5 (XT winchester)
+hwint06:hwint    6; Interrupt routine for irq 6 (floppy)
+hwint07:hwint    7; Interrupt routine for irq 7 (printer)
+
+; ---------------------------------
+%macro  hwint_slave     1
+    push    %1
+    call    hardWareInt_handler
+    add     esp, 4
+    iret
+%endmacro
+; ---------------------------------
+
+
+hwint08:hwint    ; Interrupt routine for irq 8 (realtime clock).
+        hwint_slave     8
+
+
+hwint09:hwint    ; Interrupt routine for irq 9 (irq 2 redirected)
+        hwint_slave     9
+
+
+hwint10:hwint    ; Interrupt routine for irq 10
+        hwint_slave     10
+
+
+hwint11:hwint    ; Interrupt routine for irq 11
+        hwint_slave     11
+
+
+hwint12:hwint    ; Interrupt routine for irq 12
+        hwint_slave     12
+
+
+hwint13:hwint    ; Interrupt routine for irq 13 (FPU exception)
+        hwint_slave     13
+
+
+hwint14:hwint    ; Interrupt routine for irq 14 (AT winchester)
+        hwint_slave     14
+
+
+hwint15:hwint    ; Interrupt routine for irq 15
+        hwint_slave     15

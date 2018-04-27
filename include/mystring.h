@@ -9,4 +9,6 @@ void puts(uint8_t attr,char *s);
 
 void putchar(uint8_t attr,char s);
 
+char *itoa(int num,char *str,int show_mode);
+
 #endif

@@ -65,13 +65,13 @@ _putchar_ifFull:;判断是否满屏
     cmp     ebx,80*25
     jnae    _putchar_end
     mov      ebx,80*24
-    xor     edi,edi
-    mov     esi,80*2
+    mov     edi,graphicsMemoryPosition
+    mov     esi,80*2+graphicsMemoryPosition
     mov     ecx,24*80
     rep     movsw
     mov      ecx,80
 _putchar_clear_last_line:
-    mov     word [edi+graphicsMemoryPosition],0
+    mov     word [edi],0
     add     edi,2
     loop    _putchar_clear_last_line
 _putchar_end:

@@ -5,8 +5,8 @@
 #define GDT_SIZE            128
 #define IDT_SIZE            256
 
-#define INT_VECTOR_IR0      0x32//8259A主片起始中断向量号
-#define INT_VECTOR_IR8      0x3A//8259A从片起始中断向量号
+#define INT_VECTOR_IR0      0x20//8259A主片起始中断向量号
+#define INT_VECTOR_IR8      0x28//8259A从片起始中断向量号
 #define PORT_8259A_M_CTL    0x20//8259A主片控制端口号
 #define PORT_8259A_M_MASK   0x21//8259A主片屏蔽端口号
 #define PORT_8259A_S_CTL    0xA0//8259A从片控制端口号
@@ -34,6 +34,9 @@ typedef struct{
     uint8_t     attr;//P(1),DPL(2),DT(1),TYPE(4)
     uint16_t    offset_high;
 }GATE;
+
+#define HEX 16
+#define DEC 10
 
 /* GDT */
 /* 描述符索引 */
