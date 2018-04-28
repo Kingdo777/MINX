@@ -64,9 +64,9 @@ _start:
 	lidt	[idt_ptr]
 	jmp		selector_CORE_CODE_4G:flush
 flush:
-	sti
+	;sti
 	;ud2
-	;int 	0x33
+	int 	0x10
 
 	push	string1
 	push	03h
@@ -156,53 +156,19 @@ exception:
 %endmacro
 ; ---------------------------------
 
-
-hwint00:hwint    0; Interrupt routine for irq 0 (the clock).
-hwint01:hwint    1; Interrupt routine for irq 1 (keyboard)
-hwint02:hwint    2; Interrupt routine for irq 2 (cascade!)
-hwint03:hwint    3; Interrupt routine for irq 3 (second serial)
-hwint04:hwint    4; Interrupt routine for irq 4 (first serial)
-hwint05:hwint    5; Interrupt routine for irq 5 (XT winchester)
-hwint06:hwint    6; Interrupt routine for irq 6 (floppy)
-hwint07:hwint    7; Interrupt routine for irq 7 (printer)
-
-; ---------------------------------
-%macro  hwint_slave     1
-    push    %1
-    call    hardWareInt_handler
-    add     esp, 4
-    iret
-%endmacro
-; ---------------------------------
-
-
-hwint08:hwint    ; Interrupt routine for irq 8 (realtime clock).
-        hwint_slave     8
-
-
-hwint09:hwint    ; Interrupt routine for irq 9 (irq 2 redirected)
-        hwint_slave     9
-
-
-hwint10:hwint    ; Interrupt routine for irq 10
-        hwint_slave     10
-
-
-hwint11:hwint    ; Interrupt routine for irq 11
-        hwint_slave     11
-
-
-hwint12:hwint    ; Interrupt routine for irq 12
-        hwint_slave     12
-
-
-hwint13:hwint    ; Interrupt routine for irq 13 (FPU exception)
-        hwint_slave     13
-
-
-hwint14:hwint    ; Interrupt routine for irq 14 (AT winchester)
-        hwint_slave     14
-
-
-hwint15:hwint    ; Interrupt routine for irq 15
-        hwint_slave     15
+hwint00:hwint 0; Interrupt routine for irq 0 (the clock).
+hwint01:hwint 1; Interrupt routine for irq 1 (keyboard)
+hwint02:hwint 2; Interrupt routine for irq 2 (cascade!)
+hwint03:hwint 3; Interrupt routine for irq 3 (second serial)
+hwint04:hwint 4; Interrupt routine for irq 4 (first serial)
+hwint05:hwint 5; Interrupt routine for irq 5 (XT winchester)
+hwint06:hwint 6; Interrupt routine for irq 6 (floppy)
+hwint07:hwint 7; Interrupt routine for irq 7 (printer)
+hwint08:hwint 8; Interrupt routine for irq 8 (realtime clock).
+hwint09:hwint 9; Interrupt routine for irq 9 (irq 2 redirected)
+hwint10:hwint 10; Interrupt routine for irq 10
+hwint11:hwint 11; Interrupt routine for irq 11
+hwint12:hwint 12; Interrupt routine for irq 12
+hwint13:hwint 13; Interrupt routine for irq 13 (FPU exception)
+hwint14:hwint 14; Interrupt routine for irq 14 (AT winchester)
+hwint15:hwint 15; Interrupt routine for irq 15

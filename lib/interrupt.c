@@ -148,13 +148,15 @@ void exception_handler(int vec_no,int err_code,int eip,int cs,int eflags)
 	};
 	puts(0x04,"Exception! --> ");
 	puts(0x04,err_msg[vec_no]);
+	puts(0x04,"123123");
 }
 void hardWareInt_handler(int irq)
 {
 	char	s[32];
     puts(0x04,"spurious_irq: ");
-    puts(0x04,itoa(irq,s,HEX));
-    puts(0x04,"\n");
+	puts(0x04,"123123");
+    //puts(0x04,itoa(irq,s,HEX));
+    //puts(0x04,"\n");
 }
 void	breakPointDebug(int *esp,int count){
 	char	s[32];
