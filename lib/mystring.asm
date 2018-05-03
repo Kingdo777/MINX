@@ -6,16 +6,29 @@ global  putchar     ;void putchar(uint8_t attr,char s);
 
 ;void memcpy(void*dest,void*src,uint32_t size);
 memcpy:
-    mov     ecx,[esp+12]
-    mov     esi,[esp+8]
-    mov     edi,[esp+4]
+    push    ebp
+    mov     ebp,esp
+    push    ecx
+    push    esi
+    push    edi
+    mov     ecx,[ebp+16]
+    mov     esi,[ebp+12]
+    mov     edi,[ebp+8]
     rep     movsb
+    pop     eax
+    pop     edi
+    pop     esi
+    pop     ecx
+    leave
     ret;
 
 ;void putchar(uint8_t attr,char s);
 puts:
-    mov     ebx,[esp+8]
-    mov     ah,[esp+4]
+    push    ebp
+    mov     ebp,esp
+    pushad
+    mov     ebx,[ebp+12]
+    mov     ah,[ebp+8]
 _puts_begin:
     mov     al,[ebx]
     cmp     al,0
@@ -35,12 +48,17 @@ _puts_begin:
     inc     ebx
     jmp _puts_begin
 _puts_end:
+    popad
+    leave
     ret
 
 ;void putchar(uint8_t attr,char s);
 putchar:
-    mov     ah,[esp+4]
-    mov     al,[esp+8]
+    push    ebp
+    mov     ebp,esp
+    pushad
+    mov     ah,[ebp+8]
+    mov     al,[ebp+12]
 ;记录当前光标位置
     call    read_cursor
     movzx   ebx,bx
@@ -76,6 +94,8 @@ _putchar_clear_last_line:
     loop    _putchar_clear_last_line
 _putchar_end:
     call    write_cursor
+    popad
+    leave
     ret
 
 ;读光标位置(结果保存到bx)

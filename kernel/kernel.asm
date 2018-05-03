@@ -6,6 +6,8 @@ extern	puts
 extern	exception_handler
 extern	hardWareInt_handler
 extern	breakPointDebug
+
+extern	testFunc;测试函数
 ;导入全局变量
 extern	gdt_ptr
 extern	idt_ptr
@@ -56,6 +58,7 @@ _start:
 	push	string
 	push	04h
 	call 	puts
+	add		esp,8
 
 	mov		esp,StackTop;重新切换堆栈
 	sgdt	[gdt_ptr]
@@ -64,20 +67,20 @@ _start:
 	lidt	[idt_ptr]
 	jmp		selector_CORE_CODE_4G:flush
 flush:
-	;sti
+	sti
 	;ud2
-	int 	0x10
+	;int 	0x10
+	;call 	testFunc
+
+
+
 
 	push	string1
 	push	03h
 	call 	puts
-
-	hlt
-	hlt
-	hlt
-	hlt
-	hlt
-	hlt
+	add		esp,8
+	
+	jmp		$
 
 
 ;  异常
@@ -143,7 +146,7 @@ copr_error:
 exception:
 	call	exception_handler
 	add	esp, 4*2	; 让栈顶指向 EIP，堆栈中从顶向下依次是：EIP、CS、EFLAGS
-	iret
+	iretd
 
 
 ;  硬件中断
@@ -152,7 +155,9 @@ exception:
     push    %1
     call    hardWareInt_handler
     add     esp, 4
-    iret
+	mov		al,20h
+	out		20h,al
+    iretd
 %endmacro
 ; ---------------------------------
 

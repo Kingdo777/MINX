@@ -10,12 +10,12 @@ LD		=ld
 ASMFLAGS		= -I "boot/"
 ASMFLAGS_ELF	= -f elf
 LDFLAGS			= -s -Ttext 0x30400	-m elf_i386	
-CCFLAGS			= -m32	-c  -fno-builtin -fno-stack-protector -I "include/"
+CCFLAGS			= -m32	-c  -fno-builtin -fno-stack-protector -I "include/" -O0
 
 #This Program
 BOOT_TARGET		=	boot/boot.bin boot/loader.bin
 KERNEL_TARGET	=	kernel.bin
-OBJ_TARGET		=	kernel.o start.o mystring.o protect.o kliba.o interrupt.o mystring_c.o
+OBJ_TARGET		=	kernel.o start.o mystring.o protect.o kliba.o interrupt.o mystring_c.o test.o
 #default starting positong
 everything:	$(BOOT_TARGET) $(KERNEL_TARGET)
 
@@ -58,4 +58,6 @@ interrupt.o:lib/interrupt.c include/const.h include/kliba.h \
  include/mystring.h
 	$(CC)	$(CCFLAGS)	-o $@	$<
 mystring_c.o:lib/mystring_c.c include/const.h
+	$(CC)	$(CCFLAGS)	-o $@	$<
+test.o:lib/test.c 
 	$(CC)	$(CCFLAGS)	-o $@	$<
