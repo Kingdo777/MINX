@@ -27,10 +27,14 @@ BaseOfStack:
 times 	1024	db	0
 TopOfStack:
 ;--------------------gdt部分------------------------------------------------------------------------------------------
-;					段地址		段界限		属性
-	GDT_BEGIN:	Descriptor		0		,0		,0				;空描述符
-	CORE_DATA_4G:	Descriptor	0		,0fffffh	,DA_DRW|DA_32|DA_LIMIT_4K	;内核数据段
-	CORE_CODE_4G:	Descriptor	0		,0fffffh	,DA_CR|DA_32|DA_LIMIT_4K	;内核代码段
+;								段地址		段界限		  属性
+	GDT_BEGIN:	Descriptor		0			,0			,0									;空描述符
+	CORE_DATA_4G:	Descriptor	0			,0fffffh	,DA_DRW|DA_32|DA_LIMIT_4K			;内核数据段
+	CORE_CODE_4G:	Descriptor	0			,0fffffh	,DA_CR|DA_32|DA_LIMIT_4K			;内核代码段
+	USER_DATA_4G:	Descriptor	0			,0fffffh	,DA_DRW|DA_32|DA_LIMIT_4K|DA_DPL3	;用户数据段
+	USER_CODE_4G:	Descriptor	0			,0fffffh	,DA_CR|DA_32|DA_LIMIT_4K|DA_DPL3	;用户代码段
+	LDT:			Descriptor	0			,0fffffh	,DA_LDT								;LDT
+	TSS:			Descriptor	0			,0fffffh	,DA_386TSS							;TSS
 ;gdt存储信息
 	GDTLEN	equ	$-GDT_BEGIN
 	GDTPTR	dw	GDTLEN-1

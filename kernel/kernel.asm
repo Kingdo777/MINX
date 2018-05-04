@@ -6,11 +6,13 @@ extern	puts
 extern	exception_handler
 extern	hardWareInt_handler
 extern	breakPointDebug
+extern	kernelMain
 
 extern	testFunc;测试函数
 ;导入全局变量
 extern	gdt_ptr
 extern	idt_ptr
+extern	pcb_ptr
 
 section .data
 	string  	db  `hello world!\nI am MINX\n`,0
@@ -54,6 +56,8 @@ global  hwint13
 global  hwint14
 global  hwint15
 
+global	restart
+
 _start:
 	push	string
 	push	04h
@@ -65,21 +69,18 @@ _start:
 	call	cstart
 	lgdt	[gdt_ptr]
 	lidt	[idt_ptr]
+	mov		ax,SELECTOR_TSS
+	ltr		ax
+	mov		ax,SELECTOR_LDT
+	lldt		ax
 	jmp		selector_CORE_CODE_4G:flush
 flush:
 	sti
 	;ud2
 	;int 	0x10
 	;call 	testFunc
-
-
-
-
-	push	string1
-	push	03h
-	call 	puts
-	add		esp,8
 	
+	call	kernelMain
 	jmp		$
 
 
@@ -161,7 +162,8 @@ exception:
 %endmacro
 ; ---------------------------------
 
-hwint00:hwint 0; Interrupt routine for irq 0 (the clock).
+hwint00:; Interrupt routine for irq 0 (the clock).时钟中断
+	iretd
 hwint01:hwint 1; Interrupt routine for irq 1 (keyboard)
 hwint02:hwint 2; Interrupt routine for irq 2 (cascade!)
 hwint03:hwint 3; Interrupt routine for irq 3 (second serial)
@@ -177,3 +179,9 @@ hwint12:hwint 12; Interrupt routine for irq 12
 hwint13:hwint 13; Interrupt routine for irq 13 (FPU exception)
 hwint14:hwint 14; Interrupt routine for irq 14 (AT winchester)
 hwint15:hwint 15; Interrupt routine for irq 15
+
+restart:
+	mov		esp,pcb_ptr
+
+	lea		eax,[esp+18*4];这两行代码包含居丰富的信息，我们把pcb的ss的下一成员的起始地址作为了tss中esp0，目的是在中断发生时涉及到了特权级的转化，此时将从tss中获取ss0，和esp0来进行堆栈的切换
+	mov		[tss+4],eax;我们巧妙的将此时的esp0设为pcb中的特定位置，然后利用中断保护现场的操作对pcb中的数据进行赋值

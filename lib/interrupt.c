@@ -1,9 +1,8 @@
 #include	"const.h"
 #include	"kliba.h"
 #include	"mystring.h"
+#include    "global.h"
 
-extern GDT_PTR idt_ptr;
-extern GATE idt[IDT_SIZE];
 
 
 /* 中断处理函数 */
@@ -54,7 +53,7 @@ void init_8259A(){
 	out_port(PORT_8259A_M_MASK,0x01);
 	out_port(PORT_8259A_S_MASK,0x01);
 //设置OCW1
-	out_port(PORT_8259A_M_MASK,0xFD);
+	out_port(PORT_8259A_M_MASK,0xFC);
 	out_port(PORT_8259A_S_MASK,0xFF);
 }
 

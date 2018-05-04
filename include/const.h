@@ -3,7 +3,11 @@
 #include<stdint.h>
 
 #define GDT_SIZE            128
+#define LDT_SIZE            1
 #define IDT_SIZE            256
+#define TASK_STACK_SIZE     4*1024
+#define NR_TASK             1
+
 
 #define INT_VECTOR_IR0      0x20//8259A主片起始中断向量号
 #define INT_VECTOR_IR8      0x28//8259A从片起始中断向量号
@@ -35,19 +39,88 @@ typedef struct{
     uint16_t    offset_high;
 }GATE;
 
+typedef struct {
+    uint32_t    gs;
+    uint32_t    fs;
+    uint32_t    es;
+    uint32_t    ds;
+    uint32_t    edi;
+    uint32_t    esi;
+    uint32_t    ebp;
+    uint32_t    kernel_esp;
+    uint32_t    ebx;
+    uint32_t    edx;
+    uint32_t    ecx;
+    uint32_t    eax;
+    uint32_t    retaddr;
+    uint32_t    eip;
+    uint32_t    cs;
+    uint32_t    eflags;
+    uint32_t    esp;
+    uint32_t    ss;
+}STACK_FRAME;
+typedef struct{
+    STACK_FRAME regs;
+
+    uint16_t    ldt_sel;
+    DESCRIPTOR  ldt[LDT_SIZE];
+
+    uint32_t    pid;
+    char        pName[16];
+}PCB;
+
+typedef struct {
+    uint32_t    backlink;
+    uint32_t    esp0;
+    uint32_t    ss0;
+    uint32_t    esp1;
+    uint32_t    ss1;
+    uint32_t    esp2;
+    uint32_t    ss2;
+    uint32_t    cr3;
+    uint32_t    eip;
+    uint32_t    eflags;
+    uint32_t    eax;
+    uint32_t    ecx;
+    uint32_t    edx;
+    uint32_t    ebx;
+    uint32_t    esp;
+    uint32_t    ebp;
+    uint32_t    esi;
+    uint32_t    edi;
+    uint32_t    es;
+    uint32_t    cs;
+    uint32_t    ss;
+    uint32_t    ds;
+    uint32_t    fs;
+    uint32_t    gs;
+    uint32_t    ldt;
+    uint32_t    trap;
+    uint32_t    iobase;
+
+}TSS;
+
 #define HEX 16
 #define DEC 10
 
 /* GDT */
 /* 描述符索引 */
-#define	INDEX_DUMMY		    0	// ┓
-#define	INDEX_FLAT_C		1	// ┣ LOADER 里面已经确定了的.
-#define	INDEX_FLAT_RW		2	// ┃
-#define	INDEX_VIDEO		    3	// ┛
+#define	INDEX_DUMMY		        0	
+#define	INDEX_CORE_DATA_4G      1	
+#define	INDEX_CORE_CODE_4G	    2
+#define	INDEX_USER_DATA_4G      3
+#define	INDEX_USER_CODE_4G      4
+#define	INDEX_LDT               5
+#define	INDEX_TSS               6
+
 /* 选择子 */
-#define	SELECTOR_DUMMY		     0		// ┓
-#define	selector_CORE_DATA_4G	0x08	// ┣ LOADER 里面已经确定了的.
-#define	selector_CORE_CODE_4G	0x10	// ┛
+#define	SELECTOR_DUMMY		       INDEX_DUMMY*8
+#define	SELECTOR_CORE_DATA_4G      INDEX_CORE_DATA_4G*8
+#define	SELECTOR_CORE_CODE_4G	   INDEX_CORE_CODE_4G*8
+#define	SELECTOR_USER_DATA_4G      INDEX_USER_DATA_4G*8
+#define	SELECTOR_USER_CODE_4G      INDEX_USER_CODE_4G*8
+#define	SELECTOR_LDT               INDEX_LDT*8
+#define	SELECTOR_TSS               INDEX_TSS*8
 
 /* 描述符类型值说明 */
 #define	DA_32			0x4000	/* 32 位段				*/
