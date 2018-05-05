@@ -33,8 +33,8 @@ TopOfStack:
 	CORE_CODE_4G:	Descriptor	0			,0fffffh	,DA_CR|DA_32|DA_LIMIT_4K			;内核代码段
 	USER_DATA_4G:	Descriptor	0			,0fffffh	,DA_DRW|DA_32|DA_LIMIT_4K|DA_DPL3	;用户数据段
 	USER_CODE_4G:	Descriptor	0			,0fffffh	,DA_CR|DA_32|DA_LIMIT_4K|DA_DPL3	;用户代码段
-	LDT:			Descriptor	0			,0fffffh	,DA_LDT								;LDT
-	TSS:			Descriptor	0			,0fffffh	,DA_386TSS							;TSS
+	LDT:			Descriptor	0			,0fffffh	,DA_LDT|DA_32						;LDT
+	TSS:			Descriptor	0			,0fffffh	,DA_386TSS|DA_32					;TSS
 ;gdt存储信息
 	GDTLEN	equ	$-GDT_BEGIN
 	GDTPTR	dw	GDTLEN-1

@@ -1,5 +1,7 @@
-selector_CORE_DATA_4G	equ	08h
-selector_CORE_CODE_4G	equ	10h
+selector_CORE_DATA_4G	equ	1*8
+selector_CORE_CODE_4G	equ	2*8
+SELECTOR_LDT			equ	5*8
+SELECTOR_TSS			equ	6*8
 ;导入函数
 extern	cstart
 extern	puts
@@ -13,6 +15,7 @@ extern	testFunc;测试函数
 extern	gdt_ptr
 extern	idt_ptr
 extern	pcb_ptr
+extern	tss
 
 section .data
 	string  	db  `hello world!\nI am MINX\n`,0
@@ -72,7 +75,7 @@ _start:
 	mov		ax,SELECTOR_TSS
 	ltr		ax
 	mov		ax,SELECTOR_LDT
-	lldt		ax
+	lldt	ax
 	jmp		selector_CORE_CODE_4G:flush
 flush:
 	sti
@@ -181,7 +184,14 @@ hwint14:hwint 14; Interrupt routine for irq 14 (AT winchester)
 hwint15:hwint 15; Interrupt routine for irq 15
 
 restart:
-	mov		esp,pcb_ptr
+	mov		esp,[pcb_ptr];我extern过来的是pcb_ptr的地址，这一点很关键
 
 	lea		eax,[esp+18*4];这两行代码包含居丰富的信息，我们把pcb的ss的下一成员的起始地址作为了tss中esp0，目的是在中断发生时涉及到了特权级的转化，此时将从tss中获取ss0，和esp0来进行堆栈的切换
 	mov		[tss+4],eax;我们巧妙的将此时的esp0设为pcb中的特定位置，然后利用中断保护现场的操作对pcb中的数据进行赋值
+	pop		gs
+	pop		fs
+	pop		es
+	pop		ds
+	popad
+	add		esp,4
+	iretd

@@ -67,7 +67,7 @@ void  init_idt_desc(uint8_t vector, uint8_t desc_type,void * handler, uint8_t pr
 	GATE *p_gate= &idt[vector];
 	uint32_t base= (uint32_t)handler;
 	p_gate->offset_low= base & 0xFFFF;
-	p_gate->selector= selector_CORE_CODE_4G;
+	p_gate->selector= SELECTOR_CORE_CODE_4G;
 	p_gate->dcount= 0;
 	p_gate->attr= desc_type | (privilege << 5);
 	p_gate->offset_high= (base >> 16) & 0xFFFF;

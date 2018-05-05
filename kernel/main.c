@@ -4,12 +4,10 @@
 #include    "global.h"
 
 void restart();
-
-extern  PCB     pcb_table[NR_TASK];
-extern  TSS     tss_core;
+void TestA();
 
 void kernelMain(){
-    PCB *p=pcb;
+    PCB *p=pcb_table;
     p->ldt_sel=SELECTOR_LDT;
     p->regs.cs=SELECTOR_USER_CODE_4G;
     p->regs.ds=SELECTOR_USER_DATA_4G;

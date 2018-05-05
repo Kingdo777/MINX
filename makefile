@@ -46,25 +46,26 @@ kernel.bin:$(OBJ_TARGET)
 kernel.o:kernel/kernel.asm
 	$(ASM)	$(ASMFLAGS_ELF)	-o $@	$<
 start.o:kernel/start.c include/const.h include/protect.h include/const.h \
- include/mystring.h include/interrupt.h
+ include/mystring.h include/interrupt.h include/global.h
 	$(CC)	$(CCFLAGS)	-o $@	$<
 mystring.o:lib/mystring.asm
 	$(ASM)	$(ASMFLAGS_ELF)	-o $@	$<
 protect.o:lib/protect.c include/const.h include/protect.h \
- include/const.h include/mystring.h
+ include/const.h include/mystring.h include/global.h
 	$(CC)	$(CCFLAGS)	-o $@	$<
 kliba.o:lib/kliba.asm
 	$(ASM)	$(ASMFLAGS_ELF)	-o $@	$<
 interrupt.o:lib/interrupt.c include/const.h include/kliba.h \
- include/mystring.h
+ include/mystring.h include/global.h
 	$(CC)	$(CCFLAGS)	-o $@	$<
 mystring_c.o:lib/mystring_c.c include/const.h
 	$(CC)	$(CCFLAGS)	-o $@	$<
 kliba_c.o:lib/kliba.c
 	$(CC)	$(CCFLAGS)	-o $@	$<
-main.o:kernel/main.c
+main.o:kernel/main.c include/kliba.h include/mystring.h include/const.h \
+ include/global.h
 	$(CC)	$(CCFLAGS)	-o $@	$<
-global.o:lib/global.c
+global.o:lib/global.c include/const.h
 	$(CC)	$(CCFLAGS)	-o $@	$<
 test.o:lib/test.c 
 	$(CC)	$(CCFLAGS)	-o $@	$<

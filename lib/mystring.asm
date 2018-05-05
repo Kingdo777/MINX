@@ -14,7 +14,7 @@ memset:
     push    eax
     push    edi
     pushfd
-    std
+    cld
     mov     ecx,[ebp+16]
     mov     al ,[ebp+12]
     mov     edi,[ebp+8]
@@ -35,7 +35,7 @@ memcpy:
     push    esi
     push    edi
     pushfd
-    std
+    cld
     mov     ecx,[ebp+16]
     mov     esi,[ebp+12]
     mov     edi,[ebp+8]
