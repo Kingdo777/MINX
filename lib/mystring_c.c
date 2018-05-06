@@ -1,5 +1,6 @@
 #include<stdint.h>
 #include<const.h>
+void putchar(uint8_t attr,char s);
 void puts(uint8_t attr,char *s);
 char *itoa(int num,char *str,int show_mode){
     int     n;
@@ -21,4 +22,7 @@ char *itoa(int num,char *str,int show_mode){
         *q++=*(--q1);
     *q++='\0';
     return  str;
+}
+void NL(){
+    putchar(0,'\n');
 }

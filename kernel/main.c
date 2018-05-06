@@ -19,6 +19,12 @@ void kernelMain(){
     p->regs.esp=(uint32_t)task_stack+TASK_STACK_SIZE;
     p->regs.eflags=0x3202;//IF=1,IOPL=3,第二位恒为1
     pcb_ptr=p;
+    // char    s[100];
+    // puts(0x04,itoa((int)task_stack+TASK_STACK_SIZE,s,HEX));
+    // NL();
+    // puts(0x04,itoa((int)gdt,s,HEX));
+    // NL();
+    // puts(0x04,itoa((int)&tss,s,HEX));
     restart();
     while(1); 
 }

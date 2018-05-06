@@ -72,8 +72,6 @@ _start:
 	call	cstart
 	lgdt	[gdt_ptr]
 	lidt	[idt_ptr]
-	mov		ax,SELECTOR_TSS
-	ltr		ax
 	mov		ax,SELECTOR_LDT
 	lldt	ax
 	jmp		selector_CORE_CODE_4G:flush
@@ -86,6 +84,20 @@ flush:
 	call	kernelMain
 	jmp		$
 
+restart:
+	mov		esp,[pcb_ptr];我extern过来的是pcb_ptr的地址，这一点很关键
+
+	lea		eax,[esp+18*4];这两行代码包含居丰富的信息，我们把pcb的ss的下一成员的起始地址作为了tss中esp0，目的是在中断发生时涉及到了特权级的转化，此时将从tss中获取ss0，和esp0来进行堆栈的切换
+	mov		[tss+4],eax;我们巧妙的将此时的esp0设为pcb中的特定位置，然后利用中断保护现场的操作对pcb中的数据进行赋值
+	mov		ax,SELECTOR_TSS
+	ltr		ax
+	pop		gs
+	pop		fs
+	pop		es
+	pop		ds
+	popad
+	add		esp,4
+	iretd
 
 ;  异常
 divide_error:
@@ -183,15 +195,4 @@ hwint13:hwint 13; Interrupt routine for irq 13 (FPU exception)
 hwint14:hwint 14; Interrupt routine for irq 14 (AT winchester)
 hwint15:hwint 15; Interrupt routine for irq 15
 
-restart:
-	mov		esp,[pcb_ptr];我extern过来的是pcb_ptr的地址，这一点很关键
 
-	lea		eax,[esp+18*4];这两行代码包含居丰富的信息，我们把pcb的ss的下一成员的起始地址作为了tss中esp0，目的是在中断发生时涉及到了特权级的转化，此时将从tss中获取ss0，和esp0来进行堆栈的切换
-	mov		[tss+4],eax;我们巧妙的将此时的esp0设为pcb中的特定位置，然后利用中断保护现场的操作对pcb中的数据进行赋值
-	pop		gs
-	pop		fs
-	pop		es
-	pop		ds
-	popad
-	add		esp,4
-	iretd
