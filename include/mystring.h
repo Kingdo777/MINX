@@ -15,4 +15,6 @@ void memset(void *s, uint8_t ch, uint32_t n);
 
 void NL();
 
+void putNum(int num);
+
 #endif

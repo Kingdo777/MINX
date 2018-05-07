@@ -53,8 +53,8 @@ void init_8259A(){
 	out_port(PORT_8259A_M_MASK,0x01);
 	out_port(PORT_8259A_S_MASK,0x01);
 //设置OCW1
-	out_port(PORT_8259A_M_MASK,0xFC);
-	out_port(PORT_8259A_S_MASK,0xFF);
+	out_port(PORT_8259A_M_MASK,INT_MASK_NUM_M);
+	out_port(PORT_8259A_S_MASK,INT_MASK_NUM_S);
 }
 
 /*======================================================================*

@@ -24,7 +24,7 @@ void setTss(){
     tss.ss0=SELECTOR_CORE_CODE_4G;//因为我们这里仅仅设计ring0和ring3之间的特权级转换，因此仅仅设置ss0即可
     tss.iobase=sizeof(TSS)-1;//不设置I/O许可位图  
       
-    init_descriptor(&gdt[INDEX_TSS],(uint32_t)&tss,sizeof(TSS)-1,DA_32|DA_386TSS);
+    init_descriptor(&gdt[INDEX_TSS],(uint32_t)&tss,sizeof(TSS)-1,DA_386TSS|DA_DPL1);
 }
 // uint32_t segToPhys(uint16_t seg){
 //     DESCRIPTOR  *desc=&gdt[seg>>3];

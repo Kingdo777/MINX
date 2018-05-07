@@ -20,6 +20,7 @@ extern	tss
 section .data
 	string  	db  `hello world!\nI am MINX\n`,0
 	string1  	db  `SUCCESS!\n`,0
+	string2  	db  `INT TINE!\n`,0
 	StackSpace	times	2*1024	db	0	
 	StackTop:	;栈顶指针
 
@@ -60,7 +61,7 @@ global  hwint14
 global  hwint15
 
 global	restart
-
+global	test_in_asm
 _start:
 	push	string
 	push	04h
@@ -76,14 +77,15 @@ _start:
 	lldt	ax
 	jmp		selector_CORE_CODE_4G:flush
 flush:
-	sti
+	;sti
 	;ud2
-	;int 	0x10
 	;call 	testFunc
-	
 	call	kernelMain
 	jmp		$
 
+test_in_asm:
+	int3
+	jmp		$
 restart:
 	mov		esp,[pcb_ptr];我extern过来的是pcb_ptr的地址，这一点很关键
 
@@ -178,6 +180,12 @@ exception:
 ; ---------------------------------
 
 hwint00:; Interrupt routine for irq 0 (the clock).时钟中断
+	push	string2
+	push	03h
+	call 	puts
+	add		esp,8
+	mov		al,20h
+	out		20h,al
 	iretd
 hwint01:hwint 1; Interrupt routine for irq 1 (keyboard)
 hwint02:hwint 2; Interrupt routine for irq 2 (cascade!)
