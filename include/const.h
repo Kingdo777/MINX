@@ -6,7 +6,7 @@
 #define LDT_SIZE 1
 #define IDT_SIZE 256
 #define TASK_STACK_SIZE 4 * 1024
-#define NR_TASK 1
+#define NR_TASK 2
 
 #define INT_VECTOR_IR0      0x20    //8259A主片起始中断向量号
 #define INT_VECTOR_IR8      0x28    //8259A从片起始中断向量号
@@ -74,6 +74,11 @@ typedef struct
     uint32_t pid;
     char pName[16];
 } PCB;
+
+typedef struct{
+    uint32_t eip;
+    uint32_t topOfStack;
+}TASK;
 
 typedef struct
 {

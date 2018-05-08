@@ -5,6 +5,7 @@
 
 void restart();
 void TestA();
+void TestB()
 void test_in_asm();
 
 void kernelMain()
@@ -34,10 +35,12 @@ void TestA()
         putchar(4,'A');
         delay(1);
     }
-    // for (int i = 0; i < 100000; i++)
-    // {
-    //     putNum(i);
-    //     putchar(0, '\t');
-    //     delay(1);
-    // }
+}
+
+void TestB()
+{
+    while(1){
+        putchar(4,'B');
+        delay(1);
+    }
 }

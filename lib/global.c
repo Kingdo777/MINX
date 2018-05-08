@@ -1,5 +1,5 @@
 #include    "const.h"
-
+void    
 
 GDT_PTR     gdt_ptr;
 DESCRIPTOR  gdt[GDT_SIZE];
@@ -15,3 +15,7 @@ TSS         tss;
 char        task_stack[TASK_STACK_SIZE];
 
 uint32_t clockInt_reEnter;
+
+TASK        task[NR_TASK]={
+    {}
+}

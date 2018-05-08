@@ -16,7 +16,7 @@ CCFLAGS			= -m32	-c  -fno-builtin -fno-stack-protector -I "include/" -O0
 BOOT_TARGET		=	boot/boot.bin boot/loader.bin
 KERNEL_TARGET	=	kernel.bin
 OBJ_TARGET		=	kernel.o start.o mystring.o protect.o kliba.o interrupt.o mystring_c.o kliba_c.o main.o  test.o \
-global.o
+global.o clock.o
 #default starting positong
 everything:	$(BOOT_TARGET) $(KERNEL_TARGET)
 
@@ -66,6 +66,8 @@ main.o:kernel/main.c include/kliba.h include/mystring.h include/const.h \
  include/global.h
 	$(CC)	$(CCFLAGS)	-o $@	$<
 global.o:lib/global.c include/const.h
+	$(CC)	$(CCFLAGS)	-o $@	$<
+clock.o:lib/clock.c
 	$(CC)	$(CCFLAGS)	-o $@	$<
 test.o:lib/test.c 
 	$(CC)	$(CCFLAGS)	-o $@	$<

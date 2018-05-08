@@ -9,6 +9,7 @@ extern	exception_handler
 extern	hardWareInt_handler
 extern	breakPointDebug
 extern	kernelMain
+extern	clock_handler
 
 extern	testFunc;测试函数
 ;导入全局变量
@@ -208,15 +209,12 @@ hwint00:; Interrupt routine for irq 0 (the clock).时钟中断
 	mov		esp,StackTop;切换到内核战
 	sti 	;开中断,保存现场结束后，打开中断以允许中断嵌套
 ;##############################################################
-	push	string2
-	push	04h
-	call 	puts
-	add		esp,8
+	call	clock_handler
 ;##############################################################
 	cli		;关中断，恢复现场
 	mov		esp,[pcb_ptr];将栈指针切换回进程表(我extern过来的是pcb_ptr的地址，这一点很关键)
-	; lea		eax,[esp+18*4];这两行代码包含居丰富的信息，我们把pcb的ss的下一成员的起始地址作为了tss中esp0，目的是在中断发生时涉及到了特权级的转化，此时将从tss中获取ss0，和esp0来进行堆栈的切换
-	; mov		[tss+4],eax;我们巧妙的将此时的esp0设为pcb中的特定位置，然后利用中断保护现场的操作对pcb中的数据进行赋值
+	lea		eax,[esp+18*4];这两行代码包含居丰富的信息，我们把pcb的ss的下一成员的起始地址作为了tss中esp0，目的是在中断发生时涉及到了特权级的转化，此时将从tss中获取ss0，和esp0来进行堆栈的切换
+	mov		[tss+4],eax;我们巧妙的将此时的esp0设为pcb中的特定位置，然后利用中断保护现场的操作对pcb中的数据进行赋值
 re_enter:
 	dec 	dword	[clockInt_reEnter]
 	pop		gs
