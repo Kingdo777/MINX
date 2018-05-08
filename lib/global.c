@@ -14,3 +14,4 @@ TSS         tss;
 
 char        task_stack[TASK_STACK_SIZE];
 
+uint32_t clockInt_reEnter;

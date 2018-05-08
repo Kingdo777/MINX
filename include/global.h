@@ -13,4 +13,6 @@ extern  PCB         *pcb_ptr;
 extern  TSS         tss;
 
 extern  char        task_stack[];
+
+extern  uint32_t clockInt_reEnter;
 #endif
