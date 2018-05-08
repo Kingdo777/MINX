@@ -10,11 +10,11 @@
 
 #define INT_VECTOR_IR0      0x20    //8259A主片起始中断向量号
 #define INT_VECTOR_IR8      0x28    //8259A从片起始中断向量号
-#define PORT_8259A_M_CTL    0x20     //8259A主片控制端口号
+#define PORT_8259A_M_CTL    0x20     //8259A主片控制端口号，ICW2的低三位无效，因此中断号要从8的倍数开始
 #define PORT_8259A_M_MASK   0x21    //8259A主片屏蔽端口号
 #define PORT_8259A_S_CTL    0xA0    //8259A从片控制端口号
 #define PORT_8259A_S_MASK   0xA1    //8259A从片屏蔽端口号
-#define INT_MASK_NUM_M      0xFD    //主片中断屏蔽码
+#define INT_MASK_NUM_M      0xFC    //主片中断屏蔽码
 #define INT_MASK_NUM_S      0xFF    //从片中断屏蔽码
 
 typedef struct
@@ -124,8 +124,8 @@ typedef struct
 #define SELECTOR_DUMMY INDEX_DUMMY * 8
 #define SELECTOR_CORE_DATA_4G INDEX_CORE_DATA_4G * 8
 #define SELECTOR_CORE_CODE_4G INDEX_CORE_CODE_4G * 8
-#define SELECTOR_USER_DATA_4G INDEX_USER_DATA_4G * 8 + 1
-#define SELECTOR_USER_CODE_4G INDEX_USER_CODE_4G * 8 + 1
+#define SELECTOR_USER_DATA_4G INDEX_USER_DATA_4G * 8 + PRIVILEGE_TASK
+#define SELECTOR_USER_CODE_4G INDEX_USER_CODE_4G * 8 + PRIVILEGE_TASK
 #define SELECTOR_LDT INDEX_LDT * 8
 #define SELECTOR_TSS INDEX_TSS * 8
 
