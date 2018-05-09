@@ -19,6 +19,7 @@ extern	pcb_ptr
 extern	tss
 extern	Int_reEnter;时钟中断重入检测
 extern	irq_table;硬件中断处理函数数组
+extern	system_call_func_table;系统调用处理函数数组
 
 section .data
 	string  	db  `hello world!\nI am MINX\n`,0
@@ -63,6 +64,8 @@ global  hwint12
 global  hwint13
 global  hwint14
 global  hwint15
+
+global	system_call
 
 global	restart
 global	test_in_asmA
@@ -234,21 +237,22 @@ save:
 	push	es
 	push	fs
 	push	gs
-	mov		ax,ss
-	mov		ds,ax
-	mov		es,ax
-	mov		fs,ax
-	mov		gs,ax	
-	mov		eax,esp
+	mov		si,ss
+	mov		ds,si
+	mov		es,si
+	mov		es,si
+	mov		fs,si
+	mov		gs,si	
+	mov		esi,esp
 	inc 	dword	[Int_reEnter]
 	cmp		dword	[Int_reEnter],0
 	jne		re_enter_guid
 	mov		esp,StackTop;切换到内核战
 	push	restart
-	jmp		[eax+4*12];eax是进程表的首地址，此操作是条转到call save后执行
+	jmp		[esi+4*12];eax是进程表的首地址，此操作是条转到call save后执行
 re_enter_guid:
 	push	re_enter
-	jmp		[eax+4*12];eax是进程表的首地址，此操作是条转到call save后执行
+	jmp		[esi+4*12];eax是进程表的首地址，此操作是条转到call save后执行
 	
 hwint00:hwint_master	0; Interrupt routine for irq 0 (the clock).时钟中断
 hwint01:hwint_master 	1; Interrupt routine for irq 1 (keyboard)
@@ -267,4 +271,11 @@ hwint13:hwint_slave 	13; Interrupt routine for irq 13 (FPU exception)
 hwint14:hwint_slave 	14; Interrupt routine for irq 14 (AT winchester)
 hwint15:hwint_slave 	15; Interrupt routine for irq 15
 
-
+;系统调用
+system_call:
+	call	save
+	sti 	;开中断,保存现场结束后，打开中断以允许中断嵌套
+	call	[system_call_func_table+4*eax]
+	mov		[esi+11*4],eax;此处的作用是将系统调用的返回值eax写到进程表中
+	cli		;关中断，恢复现场
+	ret

@@ -38,6 +38,7 @@ void hwint12();
 void hwint13();
 void hwint14();
 void hwint15();
+void system_call();
 
 void init_8259A(){
 //设置主从片ICW1
@@ -113,6 +114,8 @@ void setIdt(){
 	init_idt_desc(INT_VECTOR_IR8 + 5,DA_386IGate,hwint13,PRIVILEGE_KRNL);
 	init_idt_desc(INT_VECTOR_IR8 + 6,DA_386IGate,hwint14,PRIVILEGE_KRNL);
 	init_idt_desc(INT_VECTOR_IR8 + 7,DA_386IGate,hwint15,PRIVILEGE_KRNL);
+//系统调用
+	init_idt_desc(INT_VECTOR_SYS_CALL,DA_386IGate,system_call,PRIVILEGE_USER);
 //硬件中断处理函数数组的初始化
 	for(int i=0;i<NR_IRQ;i++){
 		irq_table[i]=hardWareInt_handler;

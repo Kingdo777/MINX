@@ -1,6 +1,6 @@
 #ifndef _MINX_GLOBAL_H
 #define _MINX_GLOBAL_H
-
+#include "const.h"
 extern  GDT_PTR     gdt_ptr;
 extern  DESCRIPTOR  gdt[GDT_SIZE];
 
@@ -20,5 +20,10 @@ extern  uint32_t Int_reEnter;
 extern  TASK        task[];
 
 extern  hwint_handler irq_table[];
+
+extern  system_call_var   system_call_table[];
+
+extern  int ticksCount;//时钟中断次数
+
 
 #endif

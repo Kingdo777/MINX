@@ -2,15 +2,17 @@
 #define _MINX_CONST_H
 #include <stdint.h>
 
-#define GDT_SIZE 128
-#define LDT_SIZE 1
-#define IDT_SIZE 256
+#define GDT_SIZE        128
+#define LDT_SIZE        1
+#define IDT_SIZE        256
 #define TASK_STACK_SIZE 4 * 1024
-#define NR_TASK 2
-#define NR_IRQ  16
+#define NR_TASK         3
+#define NR_IRQ          16
+#define NR_SYS_CALL     1
 
 #define INT_VECTOR_IR0      0x20    //8259A主片起始中断向量号
 #define INT_VECTOR_IR8      0x28    //8259A从片起始中断向量号
+#define INT_VECTOR_SYS_CALL 0x80    //系统调用起始中断号
 #define PORT_8259A_M_CTL    0x20     //8259A主片控制端口号，ICW2的低三位无效，因此中断号要从8的倍数开始
 #define PORT_8259A_M_MASK   0x21    //8259A主片屏蔽端口号
 #define PORT_8259A_S_CTL    0xA0    //8259A从片控制端口号
@@ -19,6 +21,7 @@
 #define INT_MASK_NUM_S      0xFF    //从片中断屏蔽码
 
 typedef void  (*hwint_handler)(int irq);//硬件中断处理函数数组
+typedef void  (*system_call_var)();//硬件中断处理函数数组
 
 typedef struct
 {

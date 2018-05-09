@@ -3,6 +3,7 @@
 #include "const.h"
 #include "global.h"
 #include "interrupt.h"
+#include "system_call.h"
 
 void restart();
 void test_in_asm();
@@ -37,6 +38,7 @@ void TestA()
 {
     while(1){
         putchar(4,'A');
+        putNum(4,get_ticks(),DEC);
         delay(1);
     }
 }
@@ -44,7 +46,15 @@ void TestA()
 void TestB()
 {
     while(1){
-        putchar(4,'B');
+        putchar(5,'B');
+        delay(1);
+    }
+}
+
+void TestC()
+{
+    while(1){
+        putchar(6,'C');
         delay(1);
     }
 }

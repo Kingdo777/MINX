@@ -30,7 +30,7 @@ void NL()
 {
     putchar(0, '\n');
 }
-void putNum(int num){
+void putNum(uint8_t attr,int num,int mode){
     char s[40];
-    puts(0x04,itoa(num,s,HEX));
+    puts(attr,itoa(num,s,mode));
 }
