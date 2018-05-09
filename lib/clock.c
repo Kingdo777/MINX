@@ -4,6 +4,7 @@
 #include "global.h"
 // 时钟中断处理程序
 void    clock_handler(){
-    if(++pcb_ptr==pcb_ptr+NR_TASK)
+    pcb_ptr++;
+    if(pcb_ptr==pcb_table+NR_TASK)
         pcb_ptr=pcb_table;
 }

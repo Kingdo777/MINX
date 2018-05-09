@@ -64,7 +64,8 @@ global  hwint14
 global  hwint15
 
 global	restart
-global	test_in_asm
+global	test_in_asmA
+global	test_in_asmB
 _start:
 	push	string
 	push	04h
@@ -88,14 +89,11 @@ flush:
 	call	kernelMain
 	jmp		$
 
-test_in_asm:
-	int		20h
-	int		20h
-	int		20h
-	int		20h
-	int		20h
-	int		20h
-	int		20h
+test_in_asmA:
+	int 	20h
+	jmp		$
+test_in_asmB:
+	int 	20h
 	jmp		$
 restart:
 	mov		esp,[pcb_ptr];我extern过来的是pcb_ptr的地址，这一点很关键
@@ -173,6 +171,7 @@ copr_error:
 exception:
 	call	exception_handler
 	add	esp, 4*2	; 让栈顶指向 EIP，堆栈中从顶向下依次是：EIP、CS、EFLAGS
+	hlt
 	iretd
 
 
