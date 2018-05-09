@@ -17,7 +17,8 @@ extern	gdt_ptr
 extern	idt_ptr
 extern	pcb_ptr
 extern	tss
-extern	clockInt_reEnter;时钟中断重入检测
+extern	Int_reEnter;时钟中断重入检测
+extern	irq_table;硬件中断处理函数数组
 
 section .data
 	string  	db  `hello world!\nI am MINX\n`,0
@@ -97,9 +98,10 @@ test_in_asmB:
 	jmp		$
 restart:
 	mov		esp,[pcb_ptr];我extern过来的是pcb_ptr的地址，这一点很关键
-
 	lea		eax,[esp+18*4];这两行代码包含居丰富的信息，我们把pcb的ss的下一成员的起始地址作为了tss中esp0，目的是在中断发生时涉及到了特权级的转化，此时将从tss中获取ss0，和esp0来进行堆栈的切换
 	mov		[tss+4],eax;我们巧妙的将此时的esp0设为pcb中的特定位置，然后利用中断保护现场的操作对pcb中的数据进行赋值
+re_enter:
+	dec 	dword	[Int_reEnter]	
 	pop		gs
 	pop		fs
 	pop		es
@@ -177,18 +179,56 @@ exception:
 
 ;  硬件中断
 ; ---------------------------------
-%macro  hwint    1
-    push    %1
-    call    hardWareInt_handler
-    add     esp, 4
+%macro  hwint_master    1
+	call	save
+	;拒绝相同类型中断的重入
+	in  	al,21h
+	or 		al,(1<<%1)
+	out 	21h,al
+	;开启硬件中断
 	mov		al,20h
 	out		20h,al
-    iretd
+	sti 	;开中断,保存现场结束后，打开中断以允许中断嵌套
+;##############################################################
+	push	%1
+	call	[irq_table+4*%1]
+	add		esp,4
+;##############################################################
+	;关中断，恢复现场
+	cli	
+	;打开该类型中断的重入
+	in  	al,21h
+	and		al,~(1<<%1)
+	out 	21h,al
+	ret
 %endmacro
-; ---------------------------------
 
-hwint00:; Interrupt routine for irq 0 (the clock).时钟中断
-	sub		esp,4
+%macro  hwint_slave    1
+	call	save
+	;拒绝相同类型中断的重入
+	in  	al,0A1h
+	or 		al,(1<<(%1-8))
+	out 	0A1h,al
+	;开启硬件中断
+	mov		al,20h
+	out		20h,al
+	sti 	;开中断,保存现场结束后，打开中断以允许中断嵌套
+;##############################################################
+	push	%1
+	call	[irq_table+4*%1]
+	add		esp,4
+;##############################################################
+	;关中断，恢复现场
+	cli		
+	;打开该类型中断的重入
+	in  	al,0A1h
+	and		al,~(1<<(%1-8))
+	out 	0A1h,al
+	ret
+%endmacro
+
+save:
+	cld
 	pushad
 	push	ds
 	push	es
@@ -198,46 +238,33 @@ hwint00:; Interrupt routine for irq 0 (the clock).时钟中断
 	mov		ds,ax
 	mov		es,ax
 	mov		fs,ax
-	mov		gs,ax
-
-	mov		al,20h
-	out		20h,al
-	inc 	dword	[clockInt_reEnter]
-	cmp		dword	[clockInt_reEnter],0
-	jne		re_enter
+	mov		gs,ax	
+	mov		eax,esp
+	inc 	dword	[Int_reEnter]
+	cmp		dword	[Int_reEnter],0
+	jne		re_enter_guid
 	mov		esp,StackTop;切换到内核战
-	sti 	;开中断,保存现场结束后，打开中断以允许中断嵌套
-;##############################################################
-	call	clock_handler
-;##############################################################
-	cli		;关中断，恢复现场
-	mov		esp,[pcb_ptr];将栈指针切换回进程表(我extern过来的是pcb_ptr的地址，这一点很关键)
-	lea		eax,[esp+18*4];这两行代码包含居丰富的信息，我们把pcb的ss的下一成员的起始地址作为了tss中esp0，目的是在中断发生时涉及到了特权级的转化，此时将从tss中获取ss0，和esp0来进行堆栈的切换
-	mov		[tss+4],eax;我们巧妙的将此时的esp0设为pcb中的特定位置，然后利用中断保护现场的操作对pcb中的数据进行赋值
-re_enter:
-	dec 	dword	[clockInt_reEnter]
-	pop		gs
-	pop		fs
-	pop		es
-	pop		ds
-	popad
-	add		esp,4
-	iretd
-
-hwint01:hwint 1; Interrupt routine for irq 1 (keyboard)
-hwint02:hwint 2; Interrupt routine for irq 2 (cascade!)
-hwint03:hwint 3; Interrupt routine for irq 3 (second serial)
-hwint04:hwint 4; Interrupt routine for irq 4 (first serial)
-hwint05:hwint 5; Interrupt routine for irq 5 (XT winchester)
-hwint06:hwint 6; Interrupt routine for irq 6 (floppy)
-hwint07:hwint 7; Interrupt routine for irq 7 (printer)
-hwint08:hwint 8; Interrupt routine for irq 8 (realtime clock).
-hwint09:hwint 9; Interrupt routine for irq 9 (irq 2 redirected)
-hwint10:hwint 10; Interrupt routine for irq 10
-hwint11:hwint 11; Interrupt routine for irq 11
-hwint12:hwint 12; Interrupt routine for irq 12
-hwint13:hwint 13; Interrupt routine for irq 13 (FPU exception)
-hwint14:hwint 14; Interrupt routine for irq 14 (AT winchester)
-hwint15:hwint 15; Interrupt routine for irq 15
+	push	restart
+	jmp		[eax+4*12];eax是进程表的首地址，此操作是条转到call save后执行
+re_enter_guid:
+	push	re_enter
+	jmp		[eax+4*12];eax是进程表的首地址，此操作是条转到call save后执行
+	
+hwint00:hwint_master	0; Interrupt routine for irq 0 (the clock).时钟中断
+hwint01:hwint_master 	1; Interrupt routine for irq 1 (keyboard)
+hwint02:hwint_master 	2; Interrupt routine for irq 2 (cascade!)
+hwint03:hwint_master 	3; Interrupt routine for irq 3 (second serial)
+hwint04:hwint_master 	4; Interrupt routine for irq 4 (first serial)
+hwint05:hwint_master 	5; Interrupt routine for irq 5 (XT winchester)
+hwint06:hwint_master 	6; Interrupt routine for irq 6 (floppy)
+hwint07:hwint_master 	7; Interrupt routine for irq 7 (printer)
+hwint08:hwint_slave 	8; Interrupt routine for irq 8 (realtime clock).
+hwint09:hwint_slave 	9; Interrupt routine for irq 9 (irq 2 redirected)
+hwint10:hwint_slave 	10; Interrupt routine for irq 10
+hwint11:hwint_slave 	11; Interrupt routine for irq 11
+hwint12:hwint_slave 	12; Interrupt routine for irq 12
+hwint13:hwint_slave 	13; Interrupt routine for irq 13 (FPU exception)
+hwint14:hwint_slave 	14; Interrupt routine for irq 14 (AT winchester)
+hwint15:hwint_slave 	15; Interrupt routine for irq 15
 
 

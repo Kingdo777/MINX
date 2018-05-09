@@ -3,7 +3,7 @@
 #include	"mystring.h"
 #include    "global.h"
 
-
+void hardWareInt_handler(int irq);
 
 /* 中断处理函数 */
 void divide_error();
@@ -97,7 +97,7 @@ void setIdt(){
 	init_idt_desc(INT_VECTOR_PAGE_FAULT,DA_386IGate,page_fault,PRIVILEGE_KRNL);
 	init_idt_desc(INT_VECTOR_COPROC_ERR,DA_386IGate,copr_error,PRIVILEGE_KRNL);
 //填充IDT的硬件中断处理
-	init_idt_desc(INT_VECTOR_IR0 + 0,DA_386IGate,hwint00,PRIVILEGE_TASK);
+	init_idt_desc(INT_VECTOR_IR0 + 0,DA_386IGate,hwint00,PRIVILEGE_KRNL);
 	init_idt_desc(INT_VECTOR_IR0 + 1,DA_386IGate,hwint01,PRIVILEGE_KRNL);
 	init_idt_desc(INT_VECTOR_IR0 + 2,DA_386IGate,hwint02,PRIVILEGE_KRNL);
 	init_idt_desc(INT_VECTOR_IR0 + 3,DA_386IGate,hwint03,PRIVILEGE_KRNL);
@@ -113,8 +113,19 @@ void setIdt(){
 	init_idt_desc(INT_VECTOR_IR8 + 5,DA_386IGate,hwint13,PRIVILEGE_KRNL);
 	init_idt_desc(INT_VECTOR_IR8 + 6,DA_386IGate,hwint14,PRIVILEGE_KRNL);
 	init_idt_desc(INT_VECTOR_IR8 + 7,DA_386IGate,hwint15,PRIVILEGE_KRNL);
+//硬件中断处理函数数组的初始化
+	for(int i=0;i<NR_IRQ;i++){
+		irq_table[i]=hardWareInt_handler;
+	}
 }
 
+//重置中断处理函数数组
+void	set_irq_table(int irq,hwint_handler handler){
+	disable_irq(irq);
+	if((int)handler!=0)
+		irq_table[irq]=handler;
+	enable_irq(irq);
+}
 
 /*======================================================================*
 exception_handler

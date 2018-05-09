@@ -15,7 +15,10 @@ extern  TSS         tss;
 extern  char        task_stack_A[];
 extern  char        task_stack_B[];
 
-extern  uint32_t clockInt_reEnter;
+extern  uint32_t Int_reEnter;
 
 extern  TASK        task[];
+
+extern  hwint_handler irq_table[];
+
 #endif

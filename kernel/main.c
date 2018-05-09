@@ -2,9 +2,11 @@
 #include "mystring.h"
 #include "const.h"
 #include "global.h"
+#include "interrupt.h"
 
 void restart();
 void test_in_asm();
+void clock_handler(int);
 
 void kernelMain()
 {
@@ -12,18 +14,20 @@ void kernelMain()
     for(int i=0;i<NR_TASK;i++){
         p=&pcb_table[i];
         p->ldt_sel = SELECTOR_LDT;
-        p->regs.cs = SELECTOR_USER_CODE_4G;
-        p->regs.ds = SELECTOR_USER_DATA_4G;
-        p->regs.es = SELECTOR_USER_DATA_4G;
-        p->regs.gs = SELECTOR_USER_DATA_4G;
-        p->regs.fs = SELECTOR_USER_DATA_4G;
-        p->regs.ss = SELECTOR_USER_DATA_4G;
+        p->regs.cs = SELECTOR_TASK_CODE_4G;
+        p->regs.ds = SELECTOR_TASK_DATA_4G;
+        p->regs.es = SELECTOR_TASK_DATA_4G;
+        p->regs.gs = SELECTOR_TASK_DATA_4G;
+        p->regs.fs = SELECTOR_TASK_DATA_4G;
+        p->regs.ss = SELECTOR_TASK_DATA_4G;
         p->regs.eip = (uint32_t)task[i].eip;
         p->regs.esp = (uint32_t)task[i].topOfStack;
         p->regs.eflags = 0x1202; //IF=1,IOPL=1,第二位恒为1
+        // p->regs.eflags = 0x0202; //IF=1,IOPL=0,第二位恒为1
     }
     pcb_ptr = pcb_table;
-    clockInt_reEnter=-1;//时钟中断重入检测
+    Int_reEnter=0;//中断重入检测
+    set_irq_table(0,clock_handler);
     restart();
     while (1)
         ;
