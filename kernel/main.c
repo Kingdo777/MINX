@@ -28,6 +28,8 @@ void kernelMain()
     }
     pcb_ptr = pcb_table;
     Int_reEnter=0;//中断重入检测
+    ticksCount=0;//很奇怪，我在global.c中对ticksCount的初始化无效    
+    // putNum(4,ticksCount,DEC);
     set_irq_table(0,clock_handler);
     restart();
     while (1)

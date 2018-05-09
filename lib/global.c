@@ -37,4 +37,4 @@ system_call_var   system_call_func_table[NR_SYS_CALL]={
     sys_get_ticks
 };
 
-int ticksCount=0;//时钟中断次数
+int ticksCount;//时钟中断次数
