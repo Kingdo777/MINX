@@ -1,9 +1,11 @@
-void delay(int time)
+//time为毫秒数
+#include    "system_call.h"
+#include    "clock.h"
+#include    <stdint.h>
+
+void delay(unsigned int time)
 {
-    for (int i = 0; i < time * 10;i++)
-        for (int i = 0; i < time * 10; i++)
-            for (int i = 0; i < time * 10; i++)
-                for (int i = 0; i < time * 10; i++)
-                    for (int i = 0; i < time * 10; i++)
-                        ;
+    unsigned int t=get_ticks();
+    while((get_ticks()-t)<time)
+        ;
 }

@@ -1,4 +1,5 @@
 #include	"const.h"
+#include	"interrupt.h"
 #include	"kliba.h"
 #include	"mystring.h"
 #include    "global.h"

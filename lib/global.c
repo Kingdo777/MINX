@@ -1,4 +1,7 @@
 #include    "const.h"
+#include    "protect.h"
+#include    "process.h"
+
 void TestA();
 void TestB();
 void TestC();

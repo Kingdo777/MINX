@@ -15,6 +15,7 @@ void kernelMain()
     for(int i=0;i<NR_TASK;i++){
         p=&pcb_table[i];
         p->ldt_sel = SELECTOR_LDT;
+        p->pid=i;
         p->regs.cs = SELECTOR_TASK_CODE_4G;
         p->regs.ds = SELECTOR_TASK_DATA_4G;
         p->regs.es = SELECTOR_TASK_DATA_4G;
@@ -41,7 +42,7 @@ void TestA()
     while(1){
         putchar(4,'A');
         putNum(4,get_ticks(),DEC);
-        delay(1);
+        delay(10);
     }
 }
 
@@ -49,7 +50,7 @@ void TestB()
 {
     while(1){
         putchar(5,'B');
-        delay(1);
+        delay(10);
     }
 }
 
@@ -57,6 +58,6 @@ void TestC()
 {
     while(1){
         putchar(6,'C');
-        delay(1);
+        delay(10);
     }
 }

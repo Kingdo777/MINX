@@ -1,6 +1,7 @@
 #ifndef _MINX_GLOBAL_H
 #define _MINX_GLOBAL_H
-#include "const.h"
+#include "protect.h"
+#include "process.h"
 extern  GDT_PTR     gdt_ptr;
 extern  DESCRIPTOR  gdt[GDT_SIZE];
 
