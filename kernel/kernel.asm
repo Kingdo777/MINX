@@ -26,7 +26,9 @@ section .data
 	string1  	db  `SUCCESS!\n`,0
 	string2  	db  `-`,0
 	string3  	db  `*`,0
-	StackSpace	times	2*1024	db	0	
+section .bss
+	; StackSpace	times	2*1024	db	0	
+	StackSpace	resb	2*1024;这个地方使用上面的那条语句将会产生一条警告（warning: attempt to initialize memory in BSS section `.bss': ignored），可能是因为.bss段是用来存放为初始化的全局变量的，而上面的语句则对数据进行了初始化操作
 	StackTop:	;栈顶指针
 
 section .text

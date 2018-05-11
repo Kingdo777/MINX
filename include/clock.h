@@ -11,9 +11,11 @@
 			     * Counter0 - LSB then MSB - rate generator - binary
 			     */
 #define TIMER_FREQ     1193182L/* clock frequency for timer in PC and AT */
-#define HZ             1000  /* clock freq (software settable on IBM-PC) */
+#define HZ             1000  /* clock freq (software settable on IBM-PC) *///1000HZ 表示1秒中产生中断1000次也就是说每1ms一个中断
 
-void reset_8253_pit();
+void 	reset_8253_pit();
+void    clock_handler(int irq);
+void 	init_clock();
 
 
 #endif

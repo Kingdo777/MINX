@@ -6,7 +6,7 @@
 #define LDT_SIZE        1
 #define IDT_SIZE        256
 #define TASK_STACK_SIZE 4 * 1024
-#define NR_TASK         3
+#define NR_TASK         4
 #define NR_IRQ          16
 #define NR_SYS_CALL     1
 

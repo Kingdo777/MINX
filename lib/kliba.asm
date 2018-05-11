@@ -2,6 +2,8 @@ global  out_port
 global  in_port
 global  enable_irq
 global  disable_irq
+global  open_hardInt
+global  close_hardInt
 
 ;void out_port(uint16_t port,uint8_t value)
 out_port:
@@ -114,4 +116,10 @@ enable_8:
         pop     ecx
         pop     eax
         leave
+        ret
+open_hardInt:
+        sti
+        ret
+close_hardInt:
+        cli
         ret

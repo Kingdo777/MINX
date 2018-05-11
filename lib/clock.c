@@ -2,6 +2,7 @@
 #include "global.h"
 #include "process.h"
 #include "clock.h"
+#include "interrupt.h"
 #include  <stdint.h>
 // 时钟中断处理程序
 void    clock_handler(int irq){
@@ -25,4 +26,9 @@ void reset_8253_pit(){
     out_port(TIMER_MODE, RATE_GENERATOR);
     out_port(TIMER0, (uint8_t) (TIMER_FREQ/HZ) );
     out_port(TIMER0, (uint8_t) ((TIMER_FREQ/HZ) >> 8));
+}
+
+void init_clock(){
+    reset_8253_pit();
+    set_irq_table(CLOCK_IRQ,clock_handler);    
 }

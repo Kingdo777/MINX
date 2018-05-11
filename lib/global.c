@@ -2,9 +2,10 @@
 #include    "protect.h"
 #include    "process.h"
 
-void TestA();
-void TestB();
-void TestC();
+void    TestA();
+void    TestB();
+void    TestC();
+void    task_tty();
 
 void  sys_get_ticks();
 // void test_in_asmA();
@@ -24,13 +25,15 @@ TSS         tss;
 char        task_stack_A[TASK_STACK_SIZE];
 char        task_stack_B[TASK_STACK_SIZE];
 char        task_stack_C[TASK_STACK_SIZE];
+char        task_stack_tty[TASK_STACK_SIZE];
 
 uint32_t    Int_reEnter;
 
 TASK        task[NR_TASK]={
   {(uint32_t)TestA,(uint32_t)task_stack_A+TASK_STACK_SIZE},
   {(uint32_t)TestB,(uint32_t)task_stack_B+TASK_STACK_SIZE},
-  {(uint32_t)TestC,(uint32_t)task_stack_C+TASK_STACK_SIZE}
+  {(uint32_t)TestC,(uint32_t)task_stack_C+TASK_STACK_SIZE},
+  {(uint32_t)task_tty,(uint32_t)task_stack_tty+TASK_STACK_SIZE}
 };
 
 
