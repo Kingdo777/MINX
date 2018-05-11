@@ -27,6 +27,11 @@ void kernelMain()
         p->regs.eflags = 0x1202; //IF=1,IOPL=1,第二位恒为1
         // p->regs.eflags = 0x0202; //IF=1,IOPL=0,第二位恒为1
     }
+    //为每个进程初始化权值
+    pcb_table[0].ticks=pcb_table[0].priority=150;
+    pcb_table[1].ticks=pcb_table[1].priority=50;
+    pcb_table[2].ticks=pcb_table[2].priority=30;
+
     pcb_ptr = pcb_table;
     Int_reEnter=0;//中断重入检测
     ticksCount=0;//很奇怪，我在global.c中对ticksCount的初始化无效    
@@ -40,8 +45,8 @@ void kernelMain()
 void TestA()
 {
     while(1){
-        putchar(4,'A');
-        putNum(4,get_ticks(),DEC);
+        puts(4,"A.");
+        // putNum(4,get_ticks(),DEC);
         delay(10);
     }
 }
@@ -49,7 +54,7 @@ void TestA()
 void TestB()
 {
     while(1){
-        putchar(5,'B');
+        puts(5,"B.");
         delay(10);
     }
 }
@@ -57,7 +62,7 @@ void TestB()
 void TestC()
 {
     while(1){
-        putchar(6,'C');
+        puts(6,"C.");
         delay(10);
     }
 }

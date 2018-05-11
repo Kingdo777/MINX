@@ -2,6 +2,8 @@
 #define _MINX_PROCESS_H
 #include    "protect.h"
 
+void    shcdule();
+
 typedef struct
 {
     uint32_t gs;
@@ -29,6 +31,9 @@ typedef struct
 
     uint16_t ldt_sel;
     DESCRIPTOR ldt[LDT_SIZE];
+
+    int ticks;
+    int priority;
 
     uint32_t pid;
     char pName[16];
@@ -70,5 +75,4 @@ typedef struct
     uint16_t iobase;
 
 } TSS;
-
 #endif

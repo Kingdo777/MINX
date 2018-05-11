@@ -1,17 +1,23 @@
 #include "kliba.h"
-#include "mystring.h"
 #include "global.h"
+#include "process.h"
 #include "clock.h"
 #include  <stdint.h>
 // 时钟中断处理程序
 void    clock_handler(int irq){
     ticksCount++;
+    pcb_ptr->ticks--;
     if(Int_reEnter!=0){
         return;
     }
-    pcb_ptr++;
-    if(pcb_ptr==pcb_table+NR_TASK)
-        pcb_ptr=pcb_table;
+    if(pcb_ptr->ticks>0){
+        return;
+    }else{
+        shcdule();
+    }
+    // pcb_ptr++;
+    // if(pcb_ptr==pcb_table+NR_TASK)
+    //     pcb_ptr=pcb_table;
 }
 
 //初始化时钟中断设备PIT
