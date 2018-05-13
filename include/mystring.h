@@ -17,4 +17,8 @@ void NL();
 
 void putNum(uint8_t attr,int num,int mode);
 
+void write_cursor(int);
+
+int read_cursor();
+
 #endif

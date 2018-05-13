@@ -2,6 +2,7 @@
 #define _MINX_GLOBAL_H
 #include "protect.h"
 #include "process.h"
+#include "tty.h"
 extern  GDT_PTR     gdt_ptr;
 extern  DESCRIPTOR  gdt[GDT_SIZE];
 
@@ -26,5 +27,8 @@ extern  system_call_var   system_call_table[];
 
 extern  int ticksCount;//时钟中断次数
 
+extern  TTY tty_table[NR_TTY];
+extern  CONSOLE console_table[NR_TTY];
+extern  TTY *current_tty;
 
 #endif

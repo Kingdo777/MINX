@@ -4,7 +4,8 @@ global  memset      ;void memset(void *s, uint8_t ch, uint32_t n);
 global  memcpy      ;void memcpy(void*dest,void*src,uint32_t size);
 global  puts        ;void puts(uint8_t attr,char *s);
 global  putchar     ;void putchar(uint8_t attr,char s);
-
+global  read_cursor
+global  write_cursor
 
 ;void memset(void *s, uint8_t ch, uint32_t n);
 memset:
@@ -86,7 +87,9 @@ putchar:
     mov     ah,[ebp+8]
     mov     al,[ebp+12]
 ;记录当前光标位置
+    push    eax
     call    read_cursor
+    pop     eax
     movzx   ebx,bx
     cmp     al,0x0a
     je      _putchar_wrap
@@ -119,7 +122,9 @@ _putchar_clear_last_line:
     add     edi,2
     loop    _putchar_clear_last_line
 _putchar_end:
+    push    ebx
     call    write_cursor
+    pop     ebx
     popad
     leave
     ret
@@ -144,13 +149,18 @@ read_cursor:
     pop     edx
     pop     ecx
     pop     eax
+    xor     eax,eax
+    mov     ax,bx
     ret
 ;写光标位置(位置保存在BX)
 write_cursor:
+    push    ebp
+    mov     ebp,esp
     push    eax
     push    ebx
     push    ecx
     push    edx
+    mov     ebx,[ebp+8]
     mov     dx,0x3d4
     mov     al,0x0e
     out     dx,al
@@ -167,4 +177,5 @@ write_cursor:
     pop      ecx
     pop      ebx
     pop      eax
+    leave
     ret

@@ -9,6 +9,8 @@
 #define NR_TASK         4
 #define NR_IRQ          16
 #define NR_SYS_CALL     1
+#define NR_TTY          4
+#define NR_TTY_BUF      1024*4
 
 #define HEX 16
 #define DEC 10

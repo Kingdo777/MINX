@@ -97,17 +97,17 @@
 #define PAD_7		(0x39 + FLAG_EXT)	/* 7		*/
 #define PAD_8		(0x3A + FLAG_EXT)	/* 8		*/
 #define PAD_9		(0x3B + FLAG_EXT)	/* 9		*/
-#define PAD_UP		PAD_8			/* Up		*/
-#define PAD_DOWN	PAD_2			/* Down		*/
-#define PAD_LEFT	PAD_4			/* Left		*/
-#define PAD_RIGHT	PAD_6			/* Right	*/
-#define PAD_HOME	PAD_7			/* Home		*/
-#define PAD_END		PAD_1			/* End		*/
-#define PAD_PAGEUP	PAD_9			/* Page Up	*/
+#define PAD_UP		PAD_8				/* Up		*/
+#define PAD_DOWN	PAD_2				/* Down		*/
+#define PAD_LEFT	PAD_4				/* Left		*/
+#define PAD_RIGHT	PAD_6				/* Right	*/
+#define PAD_HOME	PAD_7				/* Home		*/
+#define PAD_END		PAD_1				/* End		*/
+#define PAD_PAGEUP	PAD_9				/* Page Up	*/
 #define PAD_PAGEDOWN	PAD_3			/* Page Down	*/
-#define PAD_INS		PAD_0			/* Ins		*/
-#define PAD_MID		PAD_5			/* Middle key	*/
-#define PAD_DEL		PAD_DOT			/* Del		*/
+#define PAD_INS		PAD_0				/* Ins		*/
+#define PAD_MID		PAD_5				/* Middle key	*/
+#define PAD_DEL		PAD_DOT				/* Del		*/
 
 
 typedef struct{

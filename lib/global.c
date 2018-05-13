@@ -1,6 +1,8 @@
 #include    "const.h"
 #include    "protect.h"
 #include    "process.h"
+#include    "tty.h"
+#include    <stdint.h>
 
 void    TestA();
 void    TestB();
@@ -44,3 +46,7 @@ system_call_var   system_call_func_table[NR_SYS_CALL]={
 };
 
 int ticksCount;//时钟中断次数
+
+TTY tty_table[NR_TTY];
+CONSOLE console_table[NR_TTY];
+TTY *current_tty;
