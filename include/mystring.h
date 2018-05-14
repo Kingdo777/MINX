@@ -21,4 +21,8 @@ void write_cursor(int);
 
 int read_cursor();
 
+void puts_c(uint8_t attr,char *s);
+
+void putchar_c(uint8_t attr,char s);
+
 #endif

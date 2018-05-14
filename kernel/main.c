@@ -41,7 +41,6 @@ void kernelMain()
     ticksCount = 0;  //很奇怪，我在global.c中对ticksCount的初始化无效
 
     init_clock();
-    init_keyboard();
 
     restart();
     while (1)

@@ -120,6 +120,9 @@ typedef struct{
 void    keyboard_handler(int irq);
 void    init_keyboard();
 void    keyboard_read();
+void set_leds();
+void kb_ack();
+void kb_wait();
 
 
 /*====================================================================================*

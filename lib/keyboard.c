@@ -29,7 +29,8 @@ uint32_t keymap[NR_SCAN_CODES][MAP_COLS] = {
     /* 0x0B - '0'		*/ '0', ')', 0,
     /* 0x0C - '-'		*/ '-', '_', 0,
     /* 0x0D - '='		*/ '=', '+', 0,
-    /* 0x0E - BS		*/ BACKSPACE, BACKSPACE, 0,
+    // /* 0x0E - BS		*/ BACKSPACE, BACKSPACE, 0,
+    /* 0x0E - BS		*/ '\b', '\b', 0,
     /* 0x0F - TAB		*/ TAB, TAB, 0,
     // /* 0x0F - TAB		*/	TAB,		TAB,		0,
     /* 0x10 - 'q'		*/ 'q', 'Q', 0,
@@ -44,7 +45,8 @@ uint32_t keymap[NR_SCAN_CODES][MAP_COLS] = {
     /* 0x19 - 'p'		*/ 'p', 'P', 0,
     /* 0x1A - '['		*/ '[', '{', 0,
     /* 0x1B - ']'		*/ ']', '}', 0,
-    /* 0x1C - CR/LF		*/ ENTER, ENTER, PAD_ENTER,
+    // /* 0x1C - CR/LF		*/ ENTER, ENTER, PAD_ENTER,
+    /* 0x1C - CR/LF		*/ '\n', '\n', '\n',
     /* 0x1D - l. Ctrl	*/ CTRL_L, CTRL_L, CTRL_R,
     /* 0x1E - 'a'		*/ 'a', 'A', 0,
     /* 0x1F - 's'		*/ 's', 'S', 0,
@@ -158,7 +160,7 @@ int alt_r = 0;
 int ctrl_l = 0;
 int ctrl_r = 0;
 int caps_lock = 0;
-int num_lock = 0;
+int num_lock = 1;
 int scroll_lock = 0;
 
 void keyboard_handler(int irq)
@@ -247,7 +249,12 @@ void keyboard_read()
             isMakeCode = (scan_code & 0x80) ? 0 : 1; //make_code和0x80进行与操作得到的结果就是break_code，因此可由此区分两者
             maps_row = keymap[(scan_code & 0x7f)];
             maps_col = 0;
-            if (shift_l == 1 || shift_r == 1)
+            int caps=shift_l || shift_r;
+            if(caps_lock){
+                if(maps_row[0]>='a'&&maps_row[0]<='z')
+                    caps=!caps;
+            }
+            if (caps)
                 maps_col = 1;
             if (code_with_E0 == 1)
             {
@@ -275,11 +282,98 @@ void keyboard_read()
             case ALT_R:
                 alt_r = isMakeCode;
                 break;
+            case CAPS_LOCK:
+                if(isMakeCode){
+                    caps_lock=!caps_lock;
+                    set_leds();
+                }
+                break;
+            case NUM_LOCK:
+                if(isMakeCode){
+                    num_lock=!num_lock;
+                    set_leds();
+                }
+                break;
+            case SCROLL_LOCK:
+                if(isMakeCode){
+                    scroll_lock=!scroll_lock;
+                    set_leds();
+                }
+                break;
             default:
                 break;
             }
             if (isMakeCode)
             {
+                int pad = 0;
+				/* 首先处理小键盘 */
+				if ((key >= PAD_SLASH) && (key <= PAD_9)) {
+					pad = 1;
+					switch(key) {
+					case PAD_SLASH:
+						key = '/';
+						break;
+					case PAD_STAR:
+						key = '*';
+						break;
+					case PAD_MINUS:
+						key = '-';
+						break;
+					case PAD_PLUS:
+						key = '+';
+						break;
+					case PAD_ENTER:
+						key = '\n';
+						break;
+					default:
+						if (num_lock &&
+						    (key >= PAD_0) &&
+						    (key <= PAD_9)) {
+							key = key - PAD_0 + '0';
+						}
+						else if (num_lock &&
+							 (key == PAD_DOT)) {
+							key = '.';
+						}
+						else{
+							switch(key) {
+							case PAD_HOME:
+								key = HOME;
+								break;
+							case PAD_END:
+								key = END;
+								break;
+							case PAD_PAGEUP:
+								key = PAGEUP;
+								break;
+							case PAD_PAGEDOWN:
+								key = PAGEDOWN;
+								break;
+							case PAD_INS:
+								key = INSERT;
+								break;
+							case PAD_UP:
+								key = UP;
+								break;
+							case PAD_DOWN:
+								key = DOWN;
+								break;
+							case PAD_LEFT:
+								key = LEFT;
+								break;
+							case PAD_RIGHT:
+								key = RIGHT;
+								break;
+							case PAD_DOT:
+								key = DELETE;
+								break;
+							default:
+								break;
+							}
+						}
+						break;
+					}
+				}
                 //此处就是给key增加附加属性
                 key |= shift_l ? FLAG_SHIFT_L : 0;
                 key |= shift_r ? FLAG_SHIFT_R : 0;
@@ -296,7 +390,7 @@ void keyboard_read()
 uint8_t get_scanCode_from_kbBuf()
 {
     uint8_t scan_code;
-    // while(kb_buf.count<=0);
+    while(kb_buf.count<=0);
     close_hardInt(); //关中断
     scan_code = *(kb_buf.p_pending++);
     if (kb_buf.p_pending == kb_buf.buf + KE_IN_COUNT)
@@ -309,8 +403,7 @@ uint8_t get_scanCode_from_kbBuf()
 void init_keyboard()
 {
     kb_buf.count = 0;
-    kb_buf.p_usable = kb_buf.p_pending = kb_buf.buf;
-    set_irq_table(KEYBOARD_IRQ, keyboard_handler);
+
 
     //其实根据C 语言的规则，全局变量是自动初始化的，但是不知道为什么在这里总是出错，因此我手动初始化
     code_with_E0 = 0;
@@ -320,7 +413,54 @@ void init_keyboard()
     alt_r = 0;
     ctrl_l = 0;
     ctrl_r = 0;
+
     caps_lock = 0;
-    num_lock = 0;
+    num_lock = 1;
     scroll_lock = 0;
+
+    set_leds();
+
+    kb_buf.p_usable = kb_buf.p_pending = kb_buf.buf;
+    set_irq_table(KEYBOARD_IRQ, keyboard_handler);
+}
+
+/*======================================================================*
+				 kb_wait
+ *======================================================================*/
+void kb_wait()	/* 等待 8042 的输入缓冲区空 */
+{
+	uint8_t kb_stat;
+
+	do {
+		kb_stat = in_port(KB_CMD);
+	} while (kb_stat & 0x02);
+}
+
+
+/*======================================================================*
+				 kb_ack
+ *======================================================================*/
+void kb_ack()
+{
+	uint8_t kb_read;
+
+	do {
+		kb_read = in_port(KB_DATA);
+	} while (kb_read =! KB_ACK);
+}
+
+/*======================================================================*
+				 set_leds
+ *======================================================================*/
+void set_leds()
+{
+	uint8_t leds = (caps_lock << 2) | (num_lock << 1) | scroll_lock;
+
+	kb_wait();
+	out_port(KB_DATA, LED_CODE);
+	kb_ack();
+
+	kb_wait();
+	out_port(KB_DATA, leds);
+	kb_ack();
 }

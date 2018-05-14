@@ -13,7 +13,7 @@ typedef struct{
     uint32_t original_addr;//对应显存位置
     uint32_t current_start_addr;//上下翻页后对应显存的起始位置
     uint32_t v_mem_limit;//占用显存的大小,其值为显存总大小除tty个数
-    uint32_t cursoe;//光标位置
+    uint32_t cursor;//光标位置
     uint32_t cursor_MAX;//光标最大显示位置（即光标当前位置）
     uint32_t cursor_LOW;//光标最小显示位置（即$(#)后面的位置）
 }CONSOLE;
