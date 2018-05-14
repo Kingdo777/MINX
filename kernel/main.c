@@ -13,22 +13,34 @@ void test_in_asm();
 void kernelMain()
 {
     PCB *p;
-    for (int i = 0; i < NR_TASK; i++)
+    for (int i = 0; i < NR_TASK+NR_USER_PROCESS; i++)
     {
         p = &pcb_table[i];
         p->ldt_sel = SELECTOR_LDT;
         p->pid = i;
-        p->regs.cs = SELECTOR_TASK_CODE_4G;
-        p->regs.ds = SELECTOR_TASK_DATA_4G;
-        p->regs.es = SELECTOR_TASK_DATA_4G;
-        p->regs.gs = SELECTOR_TASK_DATA_4G;
-        p->regs.fs = SELECTOR_TASK_DATA_4G;
-        p->regs.ss = SELECTOR_TASK_DATA_4G;
-        p->regs.eip = (uint32_t)task[i].eip;
-        p->regs.esp = (uint32_t)task[i].topOfStack;
-        p->regs.eflags = 0x1202; //IF=1,IOPL=1,第二位恒为1
-        // p->regs.eflags = 0x0202; //IF=1,IOPL=0,第二位恒为1
-        pcb_table[i].ticks = pcb_table[i].priority = 30;
+        pcb_table[i].ticks = pcb_table[i].priority = 30; //为每个进程初始化权值       
+        if(i<NR_TASK){
+            //是TASK
+            p->regs.cs = SELECTOR_TASK_CODE_4G;
+            p->regs.ds = SELECTOR_TASK_DATA_4G;
+            p->regs.es = SELECTOR_TASK_DATA_4G;
+            p->regs.gs = SELECTOR_TASK_DATA_4G;
+            p->regs.fs = SELECTOR_TASK_DATA_4G;
+            p->regs.ss = SELECTOR_TASK_DATA_4G;
+            p->regs.eip = (uint32_t)task[i].eip;
+            p->regs.esp = (uint32_t)task[i].topOfStack;
+            p->regs.eflags = 0x1202; //IF=1,IOPL=1,第二位恒为1
+        }else{
+            p->regs.cs = SELECTOR_USER_CODE_4G;
+            p->regs.ds = SELECTOR_USER_DATA_4G;
+            p->regs.es = SELECTOR_USER_DATA_4G;
+            p->regs.gs = SELECTOR_USER_DATA_4G;
+            p->regs.fs = SELECTOR_USER_DATA_4G;
+            p->regs.ss = SELECTOR_USER_DATA_4G;
+            p->regs.eip = (uint32_t)user_process[i-NR_TASK].eip;
+            p->regs.esp = (uint32_t)user_process[i-NR_TASK].topOfStack;
+            p->regs.eflags = 0x0202; //IF=1,IOPL=0,第二位恒为1
+        } 
     }
     //为每个进程初始化权值
     // pcb_table[0].ticks=pcb_table[0].priority=30;
