@@ -16,11 +16,13 @@ void putchar_c(uint8_t attr, char s){
     switch(s){
         case '\n':
         case '\r':
+            cursor-=current_tty->p_console->current_start_addr;//这个操作的目的在于让cursor无论在那个console，都可以利用80来计算需要填充的字符
             for(int i=0;i<80&&i<((cursor/80+1)*80-cursor);i++){
                 *(v_mem_addr++)='\0';
                 *(v_mem_addr++)=7;
             }
             cursor=(cursor/80+1)*80;
+            cursor+=current_tty->p_console->current_start_addr;
             break;
         case '\b':
             for(int i=0;i<80&&((((*(v_mem_addr-1))==7)&&((*(v_mem_addr-2))=='\0')));i++){
@@ -59,7 +61,7 @@ void putchar_c(uint8_t attr, char s){
 void puts_c(uint8_t attr, char *s){
     char *p=s;
     while(*p!='\0')
-        putchar(attr,*(p++));
+        putchar_c(attr,*(p++));
 }
 char *itoa(int num, char *str, int show_mode)
 {
