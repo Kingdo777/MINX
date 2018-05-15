@@ -1,10 +1,10 @@
 selector_CORE_DATA_4G	equ	1*8
 selector_CORE_CODE_4G	equ	2*8
-SELECTOR_LDT			equ	5*8
-SELECTOR_TSS			equ	6*8
+SELECTOR_LDT			equ	7*8
+SELECTOR_TSS			equ	8*8
 ;导入函数
 extern	cstart
-extern	puts
+extern	puts_asm
 extern	exception_handler
 extern	hardWareInt_handler
 extern	breakPointDebug
@@ -75,7 +75,7 @@ global	test_in_asmB
 _start:
 	push	string
 	push	04h
-	call 	puts
+	call 	puts_asm
 	add		esp,8
 
 	mov		esp,StackTop;重新切换堆栈
@@ -276,8 +276,12 @@ hwint15:hwint_slave 	15; Interrupt routine for irq 15
 ;系统调用
 system_call:
 	call	save
+	push	dword [pcb_ptr]
 	sti 	;开中断,保存现场结束后，打开中断以允许中断嵌套
+	push	ecx;两者的入展顺序极为重要
+	push	ebx
 	call	[system_call_func_table+4*eax]
+	add		esp,4*3
 	mov		[esi+11*4],eax;此处的作用是将系统调用的返回值eax写到进程表中
 	cli		;关中断，恢复现场
 	ret

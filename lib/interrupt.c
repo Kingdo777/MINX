@@ -99,7 +99,7 @@ void setIdt(){
 	init_idt_desc(INT_VECTOR_PAGE_FAULT,DA_386IGate,page_fault,PRIVILEGE_KRNL);
 	init_idt_desc(INT_VECTOR_COPROC_ERR,DA_386IGate,copr_error,PRIVILEGE_KRNL);
 //填充IDT的硬件中断处理
-	init_idt_desc(INT_VECTOR_IR0 + 0,DA_386IGate,hwint00,PRIVILEGE_KRNL);
+	init_idt_desc(INT_VECTOR_IR0 + 0,DA_386IGate,hwint00,PRIVILEGE_USER);
 	init_idt_desc(INT_VECTOR_IR0 + 1,DA_386IGate,hwint01,PRIVILEGE_KRNL);
 	init_idt_desc(INT_VECTOR_IR0 + 2,DA_386IGate,hwint02,PRIVILEGE_KRNL);
 	init_idt_desc(INT_VECTOR_IR0 + 3,DA_386IGate,hwint03,PRIVILEGE_KRNL);
@@ -160,25 +160,21 @@ void exception_handler(int vec_no,int err_code,int eip,int cs,int eflags)
 		"#MC Machine Check",
 		"#XF SIMD Floating-Point Exception"
 	};
-	puts(0x04,"Exception! --> ");
-	puts(0x04,err_msg[vec_no]);
+	puts_asm(0x04,"Exception! --> ");
+	puts_asm(0x04,err_msg[vec_no]);
 }
 static	char c='a';
 void hardWareInt_handler(int irq)
 {
 	char	s[32];
-    puts(0x04,"spurious_irq: ");
-    puts(0x04,itoa(irq,s,HEX));
-    puts(0x04,"\n");
-	// if(!irq){
-	// 	putchar(0x04,c++);
-	// 	puts(0x04,"\n");
-	// }
+    puts("spurious_irq: ");
+    puts(itoa(irq,s,HEX));
+    puts("\n");
 }
 void	breakPointDebug(int *esp,int count){
 	char	s[32];
 	for(int i=0;i<count;i++){
-		puts(0x04,itoa(*esp++,s,HEX));
-		puts(0x04,"\n");
+		puts(itoa(*esp++,s,HEX));
+		puts("\n");
 	}
 }

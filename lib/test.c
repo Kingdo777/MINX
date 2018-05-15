@@ -4,8 +4,8 @@
 #include    "interrupt.h"
 
 void testFunc(){
-    puts(0x04,"Hello");
-    puts(0x04,"\n");
-    puts(0x04,"hello");
+    puts_asm(0x04,"Hello");
+    puts_asm(0x04,"\n");
+    puts_asm(0x04,"hello");
 
 }

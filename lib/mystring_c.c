@@ -4,12 +4,11 @@
 #include "keyboard.h"
 #include "tty.h"
 #include "mystring.h"
-void putchar(uint8_t attr, char s);
-void puts(uint8_t attr, char *s);
 
-void putchar_c(uint8_t attr, char s){
+
+void putchar_c(TTY *tty, char s){
     //考虑控制台之后的putchar
-    TTY *tty=current_tty;
+    // TTY *tty=current_tty;
     int cursor=tty->p_console->cursor;
     char *v_mem_addr=(char*)V_MEM_BASE+2*tty->p_console->cursor;
     int has_null=0;//改变量用于退格，若退格前遇到的是\n，那么将光标恢复到第一个字符前，否则是向前退一步
@@ -38,14 +37,17 @@ void putchar_c(uint8_t attr, char s){
             break;
         default:
             *(v_mem_addr++)=s;
-            *(v_mem_addr++)=attr;
+            *(v_mem_addr++)=out_char_highLight;
             cursor++;
             break;
     }
     if(cursor>=tty->p_console->original_addr+tty->p_console->v_mem_limit){
         //这个时候已经超出了显存的最大内容，我们只能覆盖最开始的内容
-        memcpy((char*)V_MEM_BASE+2*tty->p_console->original_addr+80*2,(char *)tty->p_console->original_addr,80*2);
-        cursor-=80;
+        memcpy((char*)V_MEM_BASE+2*tty->p_console->original_addr,
+        (char*)V_MEM_BASE+2*tty->p_console->original_addr+80*2,
+        tty->p_console->v_mem_limit*2-80*2);
+        cursor=tty->p_console->original_addr+tty->p_console->v_mem_limit-80;
+        memset((char*)V_MEM_BASE+cursor*2, 0, 80*2);
     }
     if(cursor>=tty->p_console->current_start_addr+80*25){
         tty->p_console->current_start_addr+=80;
@@ -57,11 +59,6 @@ void putchar_c(uint8_t attr, char s){
     tty->p_console->cursor=cursor;
     set_v_start_addr(tty->p_console->current_start_addr);
     write_cursor(cursor);
-}
-void puts_c(uint8_t attr, char *s){
-    char *p=s;
-    while(*p!='\0')
-        putchar_c(attr,*(p++));
 }
 char *itoa(int num, char *str, int show_mode)
 {
@@ -87,11 +84,19 @@ char *itoa(int num, char *str, int show_mode)
     *q++ = '\0';
     return str;
 }
-void NL()
-{
-    putchar_c(0, '\n');
+uint32_t strlen(char *s){
+    int i=0;
+    while(*s++)
+        i++;
+    return i;
 }
-void putNum(uint8_t attr,int num,int mode){
-    char s[40];
-    puts_c(attr,itoa(num,s,mode));
+void strcpy(char *des,char *src){
+    while(*src){
+        *des++ = *src++;
+    }
+    *des='\0';
+}
+void strcat(char *des,char *src){
+    uint32_t len=strlen(des);
+    strcpy(&des[len],src);
 }

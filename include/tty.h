@@ -2,6 +2,7 @@
 #define _MINX_TTY_H
 
 #include <stdint.h>
+#include "const.h"
 
 //每个tty都有一个console,console可以理解为tty的显示器，主要是显示用户输入的指令和用户要求显示的信息
 //键盘中断的任务只有一个那就是将键盘的scanCode放到键盘缓冲区当中，tyy将不断的执行tty_read和tty_write指令
@@ -28,6 +29,7 @@ typedef struct
     CONSOLE *p_console;
 } TTY;
 
+void init_all_tty();
 void tty_read();
 void tty_write();
 void in_process(uint32_t key);

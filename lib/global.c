@@ -1,6 +1,7 @@
 #include "const.h"
 #include "protect.h"
 #include "process.h"
+#include "system_call.h"
 #include "tty.h"
 #include <stdint.h>
 
@@ -9,9 +10,9 @@ void TestB();
 void TestC();
 void task_tty();
 
-void sys_get_ticks();
-// void test_in_asmA();
-// void test_in_asmB();
+
+void test_in_asmA();
+void test_in_asmB();
 
 GDT_PTR gdt_ptr;
 DESCRIPTOR gdt[GDT_SIZE];
@@ -46,10 +47,14 @@ TASK user_process[NR_USER_PROCESS]=
 hwint_handler irq_table[NR_IRQ];
 
 system_call_var system_call_func_table[NR_SYS_CALL] = {
-    sys_get_ticks};
+    sys_get_ticks,
+    sys_write
+};
 
 int ticksCount; //时钟中断次数
 
 TTY tty_table[NR_TTY];
 CONSOLE console_table[NR_TTY];
 TTY *current_tty;
+
+uint8_t out_char_highLight=4;

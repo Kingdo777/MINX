@@ -5,15 +5,18 @@
 #include "tty.h"
 #include "kliba.h"
 
-void task_tty()
-{
+void init_all_tty(){
     TTY *tty = tty_table;
     current_tty = tty_table;
     for (int i = 0; i < NR_TTY; i++)
     {
         init_tty(tty + i);
     }
-    init_keyboard();    
+    init_keyboard();
+}
+
+void task_tty()
+{ 
     while (1)
     {
         tty_read();
@@ -37,7 +40,7 @@ void tty_write()
         if (current_tty->pending++ == current_tty->tty_buf + NR_TTY_BUF)
             current_tty->pending = current_tty->tty_buf;
         current_tty->count--;
-        putchar_c(4,c);
+        putchar_c(current_tty,c);
     }
 }
 
@@ -61,19 +64,21 @@ void in_process(uint32_t key)
         case PAGEUP:
             if(current_tty->p_console->current_start_addr>=80){
                 current_tty->p_console->current_start_addr-=80;
-            if(current_tty->p_console->current_start_addr<=current_tty->p_console->original_addr){
-                current_tty->p_console->current_start_addr=current_tty->p_console->original_addr;
-            }
-                set_v_start_addr(current_tty->p_console->current_start_addr);
+                if(current_tty->p_console->current_start_addr<current_tty->p_console->original_addr){
+                    current_tty->p_console->current_start_addr+=80;
+                }else{
+                    set_v_start_addr(current_tty->p_console->current_start_addr);
+                }
             }
             break;            
             
         case PAGEDOWN:
             current_tty->p_console->current_start_addr+=80;
-            if(current_tty->p_console->current_start_addr+80*25>=current_tty->p_console->original_addr+current_tty->p_console->v_mem_limit){
-                current_tty->p_console->current_start_addr=current_tty->p_console->original_addr+current_tty->p_console->v_mem_limit-80*25;
+            if(current_tty->p_console->current_start_addr+80*25>current_tty->p_console->original_addr+current_tty->p_console->v_mem_limit){
+                current_tty->p_console->current_start_addr-=80;
+            }else{
+                set_v_start_addr(current_tty->p_console->current_start_addr);
             }
-            set_v_start_addr(current_tty->p_console->current_start_addr);
             break;
         case F1:
         case F2:

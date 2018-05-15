@@ -1,6 +1,7 @@
 #ifndef _MINX_PROCESS_H
 #define _MINX_PROCESS_H
 #include    "protect.h"
+#include    "tty.h"
 
 void    shcdule();
 
@@ -36,7 +37,9 @@ typedef struct
     int priority;
 
     uint32_t pid;
-    char pName[16];
+
+    TTY *tty;
+
 } PCB;
 
 typedef struct{

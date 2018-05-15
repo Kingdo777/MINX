@@ -19,6 +19,7 @@ void kernelMain()
         p->ldt_sel = SELECTOR_LDT;
         p->pid = i;
         pcb_table[i].ticks = pcb_table[i].priority = 30; //为每个进程初始化权值       
+        pcb_table[i].tty = tty_table; //为每个进程初始tty终端      
         if(i<NR_TASK){
             //是TASK
             p->regs.cs = SELECTOR_TASK_CODE_4G;
@@ -52,6 +53,7 @@ void kernelMain()
     Int_reEnter = 0; //中断重入检测
     ticksCount = 0;  //很奇怪，我在global.c中对ticksCount的初始化无效
 
+    init_all_tty();//初始化TTY
     init_clock();
 
     restart();
@@ -61,28 +63,38 @@ void kernelMain()
 
 void TestA()
 {
-    while (1)
+    // printf("current_start_addr:%d\n",current_tty->p_console->current_start_addr);
+    // printf("original_addr:%d\n",current_tty->p_console->original_addr);
+    // printf("v_mem_limit:%d\n",current_tty->p_console->v_mem_limit);
+    // printf("cursor:(%d,%d)\n",current_tty->p_console->cursor/80,current_tty->p_console->cursor%80);
+    int i=0;
+    while (i++<1000)
     {
-        // puts(4,"A.");
+        // puts("A.");
         // putNum(4,get_ticks(),DEC);
         delay(10);
     }
+    while(1);
 }
 
 void TestB()
 {
-    while (1)
+    int i=0;    
+    while (i++<100)
     {
-        // puts(5,"B.");
+        // puts("B.");
         delay(10);
     }
+    while(1);    
 }
 
 void TestC()
 {
-    while (1)
+    int i=0;
+    while (i++<1000)
     {
-        // puts(6,"C.");
+        // puts("C.");
         delay(10);
     }
+    while(1);    
 }

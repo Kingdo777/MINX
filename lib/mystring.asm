@@ -2,8 +2,8 @@ graphicsMemoryPosition	equ	0xB8000
 
 global  memset      ;void memset(void *s, uint8_t ch, uint32_t n);
 global  memcpy      ;void memcpy(void*dest,void*src,uint32_t size);
-global  puts        ;void puts(uint8_t attr,char *s);
-global  putchar     ;void putchar(uint8_t attr,char s);
+global  puts_asm        ;void puts(uint8_t attr,char *s);
+global  putchar_asm     ;void putchar_asm(uint8_t attr,char s);
 global  read_cursor
 global  write_cursor
 
@@ -49,8 +49,8 @@ memcpy:
     leave
     ret;
 
-;void putchar(uint8_t attr,char s);
-puts:
+;void putchar_asm(uint8_t attr,char s);
+puts_asm:
     push    ebp
     mov     ebp,esp
     pushad
@@ -68,7 +68,7 @@ _puts_begin:
     mov     bl,bh
     and     ebx,0x000000ff
     push    ebx
-    call    putchar
+    call    putchar_asm
     add     esp,8
     pop    eax
     pop     ebx
@@ -79,8 +79,8 @@ _puts_end:
     leave
     ret
 
-;void putchar(uint8_t attr,char s);
-putchar:
+;void putchar_asm(uint8_t attr,char s);
+putchar_asm:
     push    ebp
     mov     ebp,esp
     pushad
