@@ -63,10 +63,10 @@ void kernelMain()
 
 void TestA()
 {
-    // printf("current_start_addr:%d\n",current_tty->p_console->current_start_addr);
-    // printf("original_addr:%d\n",current_tty->p_console->original_addr);
-    // printf("v_mem_limit:%d\n",current_tty->p_console->v_mem_limit);
-    // printf("cursor:(%d,%d)\n",current_tty->p_console->cursor/80,current_tty->p_console->cursor%80);
+    printf("current_start_addr:%d\n",current_tty->p_console->current_start_addr);
+    printf("original_addr:%d\n",current_tty->p_console->original_addr);
+    printf("v_mem_limit:%d\n",current_tty->p_console->v_mem_limit);
+    printf("cursor:(%d,%d)\n",current_tty->p_console->cursor/80,current_tty->p_console->cursor%80);
     int i=0;
     while (i++<1000)
     {

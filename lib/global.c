@@ -48,7 +48,8 @@ hwint_handler irq_table[NR_IRQ];
 
 system_call_var system_call_func_table[NR_SYS_CALL] = {
     sys_get_ticks,
-    sys_write
+    sys_write,
+    sys_printx
 };
 
 int ticksCount; //时钟中断次数

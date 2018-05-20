@@ -9,7 +9,7 @@
 #define NR_TASK         1
 #define NR_USER_PROCESS 3
 #define NR_IRQ          16
-#define NR_SYS_CALL     2
+#define NR_SYS_CALL     3
 #define NR_TTY          2
 #define NR_TTY_BUF      1024*4
 
@@ -40,5 +40,9 @@
 
 typedef void  (*hwint_handler)(int irq);//硬件中断处理函数数组
 typedef void  (*system_call_var)();//硬件中断处理函数数组
+
+//下面两个常量应用在printx系统调用上面，其数值并不是关键，其镶嵌在字符串的第一个字符上面，printx会检查要打印字符串的第一个字符，若是这两个标志，将会进行特殊处理
+#define MAG_CH_PANIC 	1
+#define MAG_CH_ASSERT 	2
 
 #endif

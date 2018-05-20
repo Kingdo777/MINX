@@ -278,10 +278,11 @@ system_call:
 	call	save
 	push	dword [pcb_ptr]
 	sti 	;开中断,保存现场结束后，打开中断以允许中断嵌套
-	push	ecx;两者的入展顺序极为重要
+	push	edx;两者的入展顺序极为重要	
+	push	ecx
 	push	ebx
 	call	[system_call_func_table+4*eax]
-	add		esp,4*3
+	add		esp,4*4
 	mov		[esi+11*4],eax;此处的作用是将系统调用的返回值eax写到进程表中
 	cli		;关中断，恢复现场
 	ret

@@ -12,7 +12,8 @@ int printf(const char*fmt,...){
     va_list args=get_arg_list(fmt);
     // putNum(args,16);
     len=vsprintf(buf,fmt,args);
-    write(buf,len);
+    // write(buf,len);
+    printx(buf);
     return len;
 }
 
@@ -47,6 +48,7 @@ int vsprintf(char *buf,const char *fmt,va_list args){
             default:break;
         }
     }
+    *p='\0';
     return p-buf;
 }
 

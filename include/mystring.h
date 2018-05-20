@@ -15,6 +15,8 @@ char *itoa(int num,char *str,int show_mode);
 
 void memset(void *s, uint8_t ch, uint32_t n);
 
+void memset_word(void *s, uint16_t word, uint32_t n);
+
 void NL();
 
 void putNum(int num,int mode);

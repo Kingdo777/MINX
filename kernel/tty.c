@@ -156,3 +156,18 @@ void init_screen(TTY *tty)
     }
 
 }
+/**
+ * 清屏幕操作，让current_start_addr与original_addr重合，并将整个tty置为0x0720
+ * 0x0720:黑底白字的空格
+*/
+void clear(){
+    current_tty->p_console->cursor=
+    current_tty->p_console->current_start_addr=
+    current_tty->p_console->original_addr;
+    set_v_start_addr(current_tty->p_console->current_start_addr);
+    write_cursor(current_tty->p_console->cursor);
+    memset_word((void *)V_MEM_BASE+current_tty->p_console->cursor*2,
+    0x0720,
+    current_tty->p_console->v_mem_limit
+    );
+}
