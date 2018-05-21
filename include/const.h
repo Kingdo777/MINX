@@ -45,4 +45,16 @@ typedef void  (*system_call_var)();//硬件中断处理函数数组
 #define MAG_CH_PANIC 	1
 #define MAG_CH_ASSERT 	2
 
+/* the assert macro */
+#define ASSERT
+#ifdef ASSERT
+void assertion_failure(char *exp, char *file, char *base_file, int line);
+#define assert(exp)  if (exp) ; \
+        else assertion_failure(#exp, __FILE__, __BASE_FILE__, __LINE__);
+#else
+#define assert(exp)
+#endif
+
+#define printl printf
+
 #endif

@@ -36,4 +36,6 @@ void strcat(char *des,char *src);
 
 int printf(const char*fmt,...);
 
+void panic(const char *fmt, ...);
+
 #endif

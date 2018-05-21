@@ -58,4 +58,4 @@ TTY tty_table[NR_TTY];
 CONSOLE console_table[NR_TTY];
 TTY *current_tty;
 
-uint8_t out_char_highLight=4;
+uint8_t out_char_highLight=0x07;

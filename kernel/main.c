@@ -63,6 +63,7 @@ void kernelMain()
 
 void TestA()
 {
+    printf("###%c%c%c###\n",'1','2','3');
     printf("current_start_addr:%d\n",current_tty->p_console->current_start_addr);
     printf("original_addr:%d\n",current_tty->p_console->original_addr);
     printf("v_mem_limit:%d\n",current_tty->p_console->v_mem_limit);
@@ -80,6 +81,8 @@ void TestA()
 void TestB()
 {
     int i=0;    
+    // panic("TestB()");
+    // assert(0);
     while (i++<100)
     {
         // puts("B.");

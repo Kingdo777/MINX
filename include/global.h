@@ -34,6 +34,6 @@ extern  TTY tty_table[NR_TTY];
 extern  CONSOLE console_table[NR_TTY];
 extern  TTY *current_tty;
 
-uint8_t out_char_highLight;
+extern uint8_t out_char_highLight;
 
 #endif

@@ -4,6 +4,7 @@ global  enable_irq
 global  disable_irq
 global  open_hardInt
 global  close_hardInt
+global  hltf
 
 ;void out_port(uint16_t port,uint8_t value)
 out_port:
@@ -123,3 +124,5 @@ open_hardInt:
 close_hardInt:
         cli
         ret
+hltf:
+        hlt
