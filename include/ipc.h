@@ -10,6 +10,8 @@ int  msg_receive(PCB* current, int src, MESSAGE* m);
 int  deadlock(int src, int dest);
 int  getpid(PCB *p);
 int send_recv(int ipc_type, int dest_process_pid, MESSAGE* msg);
+void dump_proc(PCB* p);
+void dump_msg(const char * title, MESSAGE* m);
 void reset_msg(MESSAGE* p);
 
 #endif

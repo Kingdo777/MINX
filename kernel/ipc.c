@@ -7,6 +7,7 @@
 #include "global.h"
 #include "ipc.h"
 #include "system_call.h"
+#include "kliba.h"
 /*****************************************************************************
  *                                send_recv
  *****************************************************************************/
@@ -389,72 +390,64 @@ int getpid(PCB *p)
     return p->pid;
 }
 
-// /*****************************************************************************
-//  *                                dump_proc
-//  *****************************************************************************/
-// void dump_proc(PCB* p)
-// {
-// 	char info[STR_DEFAULT_LEN];
-// 	int i;
-// 	int text_color = MAKE_COLOR(GREEN, RED);
+/*****************************************************************************
+ *                                dump_proc
+ *****************************************************************************/
+void dump_proc(PCB* p)
+{
+	set_out_char_highLight(MAKE_COLOR(GREEN,RED));
+	char info[1024];
+	int i;
 
-// 	int dump_len = sizeof(PCB);
+	int dump_len = sizeof(PCB);
 
-// 	out_byte(CRTC_ADDR_REG, START_ADDR_H);
-// 	out_byte(CRTC_DATA_REG, 0);
-// 	out_byte(CRTC_ADDR_REG, START_ADDR_L);
-// 	out_byte(CRTC_DATA_REG, 0);
+	printf("byte dump of pcb_table[%d]:\n", p - pcb_table); 
+	for (i = 0; i < dump_len; i++) {
+		printf("%d.", ((unsigned char *)p)[i]);
+		
+	}
 
-// 	sprintf(info, "byte dump of pcb_table[%d]:\n", p - pcb_table); disp_color_str(info, text_color);
-// 	for (i = 0; i < dump_len; i++) {
-// 		sprintf(info, "%x.", ((unsigned char *)p)[i]);
-// 		disp_color_str(info, text_color);
-// 	}
+	NL();
+	printf("ANY: %d.\n", ANY); 
+	printf("NO_TASK: %d.\n", NO_TASK); 
+	NL();
 
-// 	/* printl("^^"); */
-
-// 	disp_color_str("\n\n", text_color);
-// 	sprintf(info, "ANY: 0x%x.\n", ANY); disp_color_str(info, text_color);
-// 	sprintf(info, "NO_TASK: 0x%x.\n", NO_TASK); disp_color_str(info, text_color);
-// 	disp_color_str("\n", text_color);
-
-// 	sprintf(info, "ldt_sel: 0x%x.  ", p->ldt_sel); disp_color_str(info, text_color);
-// 	sprintf(info, "ticks: 0x%x.  ", p->ticks); disp_color_str(info, text_color);
-// 	sprintf(info, "priority: 0x%x.  ", p->priority); disp_color_str(info, text_color);
-// 	sprintf(info, "pid: 0x%x.  ", p->pid); disp_color_str(info, text_color);
-// 	sprintf(info, "name: %s.  ", p->name); disp_color_str(info, text_color);
-// 	disp_color_str("\n", text_color);
-// 	sprintf(info, "p_flags: 0x%x.  ", p->p_flags); disp_color_str(info, text_color);
-// 	sprintf(info, "p_recvfrom: 0x%x.  ", p->p_recvfrom); disp_color_str(info, text_color);
-// 	sprintf(info, "p_sendto: 0x%x.  ", p->p_sendto); disp_color_str(info, text_color);
-// 	sprintf(info, "nr_tty: 0x%x.  ", p->nr_tty); disp_color_str(info, text_color);
-// 	disp_color_str("\n", text_color);
-// 	sprintf(info, "has_int_msg: 0x%x.  ", p->has_int_msg); disp_color_str(info, text_color);
-// }
+	printf("ldt_sel: %d.  \n", p->ldt_sel); 
+	printf("ticks: %d.  \n", p->ticks); 
+	printf("priority: %d.  \n", p->priority); 
+	printf("pid: %d.  \n", p->pid); 
+	NL();
+	printf("p_flags: %d.  \n", p->p_flags); 
+	printf("p_recvfrom: %d.  \n", p->p_recvfrom); 
+	printf("p_sendto: %d.  \n", p->p_sendto); 
+	printf("nr_tty: %d.  \n", p->tty-tty_table); 
+	NL();
+	printf("has_int_msg: %d.  \n", p->has_int_msg); 
+	set_out_char_highLight(MAKE_COLOR(BLACK,WHITE));	
+}
 
 
-// /*****************************************************************************
-//  *                                dump_msg
-//  *****************************************************************************/
-// void dump_msg(const char * title, MESSAGE* m)
-// {
-// 	int packed = 0;
-// 	printl("{%s}<0x%x>{%ssrc:%s(%d),%stype:%d,%s(0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x)%s}%s",  //, (0x%x, 0x%x, 0x%x)}",
-// 	       title,
-// 	       (int)m,
-// 	       packed ? "" : "\n        ",
-// 	       pcb_table[m->source].name,
-// 	       m->source,
-// 	       packed ? " " : "\n        ",
-// 	       m->type,
-// 	       packed ? " " : "\n        ",
-// 	       m->u.m3.m3i1,
-// 	       m->u.m3.m3i2,
-// 	       m->u.m3.m3i3,
-// 	       m->u.m3.m3i4,
-// 	       (int)m->u.m3.m3p1,
-// 	       (int)m->u.m3.m3p2,
-// 	       packed ? "" : "\n",
-// 	       packed ? "" : "\n"/* , */
-// 		);
-// }
+/*****************************************************************************
+ *                                dump_msg
+ *****************************************************************************/
+void dump_msg(const char * title, MESSAGE* m)
+{
+	int packed = 0;
+	printl("{%s}<%d>{%spid:%d,%stype:%d,%s(%d, %d, %d, %d, %d, %d)%s}%s",  //, (%d, %d, %d)}",
+	       title,
+	       (int)m,
+	       packed ? "" : "\n        ",
+	       m->source,
+	       packed ? " " : "\n        ",
+	       m->type,
+	       packed ? " " : "\n        ",
+	       m->u.m3.m3i1,
+	       m->u.m3.m3i2,
+	       m->u.m3.m3i3,
+	       m->u.m3.m3i4,
+	       (int)m->u.m3.m3p1,
+	       (int)m->u.m3.m3p2,
+	       packed ? "" : "\n",
+	       packed ? "" : "\n"/* , */
+		);
+}

@@ -72,6 +72,7 @@ void kernelMain()
 
 void TestA()
 {
+    dump_proc(pcb_ptr);
     // printf("###%c%c%c###\n",'1','2','3');
     // printf("current_start_addr:%d\n",current_tty->p_console->current_start_addr);
     // printf("original_addr:%d\n",current_tty->p_console->original_addr);
@@ -84,9 +85,10 @@ void TestA()
         // putNum(get_ticks_by_message(),10);
         // printf("---");
         // putNum(get_ticks(),10);
+
         set_out_char_highLight(4);               
-        puts("A.");
-        delay(10);
+        // puts("A.");
+        // delay(10);
     }
     while(1);
 }
@@ -99,8 +101,8 @@ void TestB()
     while (i++<100)
     {
         set_out_char_highLight(5);        
-        puts("B.");
-        delay(10);
+        // puts("B.");
+        // delay(10);
     }
     while(1);    
 }
@@ -111,8 +113,8 @@ void TestC()
     while (i++<100)
     {
         set_out_char_highLight(6);        
-        puts("C.");
-        delay(10);
+        // puts("C.");
+        // delay(10);
     }
     while(1);    
 }
