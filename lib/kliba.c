@@ -4,13 +4,23 @@
 #include    "const.h"
 #include    "global.h"
 #include    "mystring.h"
+#include    "ipc.h"
 #include    <stdint.h>
+
+int get_ticks_by_message(){
+	MESSAGE m;
+	reset_msg(&m);
+	m.type=GET_TICKS;
+	send_recv(BOTH,TASK_SYS,&m);
+	return m.RETVAL;
+}
 
 void delay(unsigned int time)
 {
     unsigned int t=get_ticks();
-    while((get_ticks()-t)<time)
-        ;
+    while((get_ticks()-t)<time);
+	// unsigned int t=get_ticks_by_message();
+    // while((get_ticks_by_message()-t)<time);
 }
 void set_out_char_highLight(uint8_t m){
     out_char_highLight=m;

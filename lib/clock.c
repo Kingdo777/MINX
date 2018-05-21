@@ -14,7 +14,7 @@ void    clock_handler(int irq){
     if(pcb_ptr->ticks>0){
         return;
     }else{
-        shcdule();
+        schedule();
     }
     // pcb_ptr++;
     // if(pcb_ptr==pcb_table+NR_TASK)

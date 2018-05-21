@@ -6,10 +6,10 @@
 #define LDT_SIZE        1
 #define IDT_SIZE        256
 #define TASK_STACK_SIZE 4 * 1024
-#define NR_TASK         1
+#define NR_TASK         2
 #define NR_USER_PROCESS 3
 #define NR_IRQ          16
-#define NR_SYS_CALL     3
+#define NR_SYS_CALL     4
 #define NR_TTY          2
 #define NR_TTY_BUF      1024*4
 
@@ -56,5 +56,44 @@ void assertion_failure(char *exp, char *file, char *base_file, int line);
 #endif
 
 #define printl printf
+
+/* tasks */
+/* 注意 TASK_XXX 的定义要与 global.c 中task[NR_TASK]数组对应 */
+#define INVALID_DRIVER	-20
+#define INTERRUPT	-10
+#define TASK_TTY	0
+#define TASK_SYS	1
+/* #define TASK_WINCH	2 */
+/* #define TASK_FS	3 */
+/* #define TASK_MM	4 */
+#define ANY		(NR_TASK + NR_USER_PROCESS + 10)
+#define NO_TASK		(NR_TASK + NR_USER_PROCESS + 20)
+
+
+/* ipc_type */
+#define SEND		1
+#define RECEIVE		2
+#define BOTH		3	/* BOTH = (SEND | RECEIVE) */
+
+/* Process flags*/
+#define SENDING   0x02	/* set when proc trying to send */
+#define RECEIVING 0x04	/* set when proc trying to recv */
+
+/**
+ * @enum msgtype
+ * @brief MESSAGE types
+ */
+enum msgtype {
+	/* 
+	 * when hard interrupt occurs, a msg (with type==HARD_INT) will
+	 * be sent to some tasks
+	 */
+	HARD_INT = 1,
+
+	/* SYS task */
+	GET_TICKS,
+};
+
+#define	RETVAL		u.m3.m3i1//可以用message.RETVAL来接受消息中的返回值的信息
 
 #endif

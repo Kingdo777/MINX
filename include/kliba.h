@@ -13,5 +13,6 @@ void hltf();
 void set_out_char_highLight(uint8_t m);
 void assertion_failure(char *exp, char *file, char *base_file, int line);
 void spin(char *func_name);
+int get_ticks_by_message();
 
 #endif

@@ -3,6 +3,7 @@
 #include "mystring.h"
 #include "process.h"
 #include "kliba.h"
+#include "ipc.h"
 //此函数用于实现system_call_table中的函数
 int sys_get_ticks()
 {
@@ -68,4 +69,54 @@ void sys_printx(uint32_t unused_var1, uint32_t unused_var2, char *s, PCB *pcb)
 		}
 	}
 	return;
+}
+
+/*****************************************************************************
+ *                                sys_sendrec
+ *****************************************************************************/
+/**
+ * <Ring 0> The core routine of system call `sendrec()'.
+ * 
+ * @param ipc_type SEND or RECEIVE
+ * @param dest_process_pid To/From whom the message is transferred.
+ * @param m        Ptr to the MESSAGE body.
+ * @param p        The caller proc.
+ * 
+ * @return Zero if success.
+ *****************************************************************************/
+int sys_sendrec(int ipc_type, int dest_process_pid, MESSAGE* m, PCB* p)
+{
+	//我其实没有理解下面这条代码的含义，原文的注释是“make sure we are not in ring0”
+	assert(Int_reEnter == 0);	
+	//保证目标进程的取值合理
+	assert((dest_process_pid >= 0 && dest_process_pid < NR_TASK + NR_USER_PROCESS) ||
+	       dest_process_pid == ANY ||
+	       dest_process_pid == INTERRUPT);
+
+	int ret = 0;
+	int caller = getpid(p);
+	m->source = caller;
+	//保证收件人和发送人不是同一个
+	assert(m->source != dest_process_pid);
+
+	/**
+	 * ipc_type还有第三种类型BOTH，该扫作可以看作是先进行SEND然后在RECEIVE，主要应用场景是接受一个返回值，BOTH的处理在函数send_rec中处理，
+	 * 因此在这里不需要考虑
+	 */
+	if (ipc_type == SEND) {
+		ret = msg_send(p, dest_process_pid, m);
+		if (ret != 0)
+			return ret;
+	}
+	else if (ipc_type == RECEIVE) {
+		ret = msg_receive(p, dest_process_pid, m);
+		if (ret != 0)
+			return ret;
+	}
+	else {
+		panic("{sys_sendrec} invalid ipc_type: "
+		      "%d (SEND:%d, RECEIVE:%d).", ipc_type, SEND, RECEIVE);
+	}
+
+	return 0;
 }

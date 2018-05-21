@@ -2,11 +2,13 @@
 _NR_get_ticks       equ 0;系统调用功能号
 _NR_write           equ 1;系统调用功能号
 _NR_printx          equ 2
+_NR_sendrec         equ 3
 INT_VECTOR_SYS_CALL equ 80h
 
 global  get_ticks
 global  write
 global  printx
+global  sendrec
 
 bits    32
 section    .text
@@ -35,6 +37,22 @@ printx:
     mov     eax,_NR_printx
     mov     edx,[ebp+8];char *buf
     int     INT_VECTOR_SYS_CALL
+    pop     edx
+    leave
+    ret
+sendrec:
+    push    ebp
+    mov     ebp,esp
+    push    edx;eax是返回值，万不可保存
+    push    ecx
+    push    ebx
+    mov     eax,_NR_sendrec
+    mov     ebx,[ebp+8];int ipc_type
+    mov     ecx,[ebp+12];int dest_task_pid
+    mov     edx,[ebp+16];Message *m
+    int     INT_VECTOR_SYS_CALL
+    pop     ebx
+    pop     ecx
     pop     edx
     leave
     ret

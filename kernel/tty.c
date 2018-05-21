@@ -17,8 +17,6 @@ void init_all_tty(){
 
 void task_tty()
 { 
-    assert(0);
-    
     while (1)
     {
         tty_read();

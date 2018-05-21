@@ -6,6 +6,7 @@
 #include "system_call.h"
 #include "clock.h"
 #include "keyboard.h"
+#include "ipc.h"
 
 void restart();
 void test_in_asm();
@@ -18,8 +19,16 @@ void kernelMain()
         p = &pcb_table[i];
         p->ldt_sel = SELECTOR_LDT;
         p->pid = i;
-        pcb_table[i].ticks = pcb_table[i].priority = 30; //为每个进程初始化权值       
-        pcb_table[i].tty = tty_table; //为每个进程初始tty终端      
+        p->ticks = pcb_table[i].priority = 30; //为每个进程初始化权值       
+        p->tty = tty_table; //为每个进程初始tty终端  
+        //消息相关
+        p->p_flags = 0;
+		p->p_msg = 0;
+		p->p_recvfrom = NO_TASK;
+		p->p_sendto = NO_TASK;
+		p->has_int_msg = 0;
+		p->q_sending = 0;
+		p->next_sending = 0;    
         if(i<NR_TASK){
             //是TASK
             p->regs.cs = SELECTOR_TASK_CODE_4G;
@@ -63,16 +72,20 @@ void kernelMain()
 
 void TestA()
 {
-    printf("###%c%c%c###\n",'1','2','3');
-    printf("current_start_addr:%d\n",current_tty->p_console->current_start_addr);
-    printf("original_addr:%d\n",current_tty->p_console->original_addr);
-    printf("v_mem_limit:%d\n",current_tty->p_console->v_mem_limit);
-    printf("cursor:(%d,%d)\n",current_tty->p_console->cursor/80,current_tty->p_console->cursor%80);
+    // printf("###%c%c%c###\n",'1','2','3');
+    // printf("current_start_addr:%d\n",current_tty->p_console->current_start_addr);
+    // printf("original_addr:%d\n",current_tty->p_console->original_addr);
+    // printf("v_mem_limit:%d\n",current_tty->p_console->v_mem_limit);
+    // printf("cursor:(%d,%d)\n",current_tty->p_console->cursor/80,current_tty->p_console->cursor%80);
     int i=0;
-    while (i++<1000)
+    while (i++<100)
     {
-        // puts("A.");
-        // putNum(4,get_ticks(),DEC);
+        // get_ticks_by_message();
+        // putNum(get_ticks_by_message(),10);
+        // printf("---");
+        // putNum(get_ticks(),10);
+        set_out_char_highLight(4);               
+        puts("A.");
         delay(10);
     }
     while(1);
@@ -85,7 +98,8 @@ void TestB()
     // assert(0);
     while (i++<100)
     {
-        // puts("B.");
+        set_out_char_highLight(5);        
+        puts("B.");
         delay(10);
     }
     while(1);    
@@ -94,10 +108,27 @@ void TestB()
 void TestC()
 {
     int i=0;
-    while (i++<1000)
+    while (i++<100)
     {
-        // puts("C.");
+        set_out_char_highLight(6);        
+        puts("C.");
         delay(10);
     }
     while(1);    
+}
+void task_sys(){
+    MESSAGE msg;
+	while (1) {
+		send_recv(RECEIVE, ANY, &msg);
+		int src = msg.source;
+		switch (msg.type) {
+		case GET_TICKS:
+			msg.RETVAL = ticksCount;
+			send_recv(SEND, src, &msg);
+			break;
+		default:
+			panic("unknown msg type");
+			break;
+		}
+	}
 }
