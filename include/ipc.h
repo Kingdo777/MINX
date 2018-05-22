@@ -13,5 +13,6 @@ int send_recv(int ipc_type, int dest_process_pid, MESSAGE* msg);
 void dump_proc(PCB* p);
 void dump_msg(const char * title, MESSAGE* m);
 void reset_msg(MESSAGE* p);
+void inform_int(int task_nr);
 
 #endif

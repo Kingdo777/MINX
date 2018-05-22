@@ -10,7 +10,8 @@ void TestB();
 void TestC();
 void task_tty();
 void task_sys();
-
+void task_hd();
+void task_fs();
 
 void test_in_asmA();
 void test_in_asmB();
@@ -31,13 +32,17 @@ char task_stack_B[TASK_STACK_SIZE];
 char task_stack_C[TASK_STACK_SIZE];
 char task_stack_tty[TASK_STACK_SIZE];
 char task_stack_sys[TASK_STACK_SIZE];
+char task_stack_hd[TASK_STACK_SIZE];
+char task_stack_fs[TASK_STACK_SIZE];
 
 uint32_t Int_reEnter;
 
 TASK task[NR_TASK] = 
 {
     {(uint32_t)task_tty, (uint32_t)task_stack_tty + TASK_STACK_SIZE},
-    {(uint32_t)task_sys, (uint32_t)task_stack_sys + TASK_STACK_SIZE}
+    {(uint32_t)task_sys, (uint32_t)task_stack_sys + TASK_STACK_SIZE},
+    {(uint32_t)task_hd, (uint32_t)task_stack_hd + TASK_STACK_SIZE},
+    {(uint32_t)task_fs, (uint32_t)task_stack_fs + TASK_STACK_SIZE}
 };
 
 TASK user_process[NR_USER_PROCESS]=

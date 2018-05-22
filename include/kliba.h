@@ -14,5 +14,7 @@ void set_out_char_highLight(uint8_t m);
 void assertion_failure(char *exp, char *file, char *base_file, int line);
 void spin(char *func_name);
 int get_ticks_by_message();
+void port_read(uint16_t port, void* buf, int n);
+void port_write(uint16_t port, void* buf, int n);
 
 #endif

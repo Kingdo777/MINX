@@ -128,6 +128,8 @@ void	set_irq_table(int irq,hwint_handler handler){
 	disable_irq(irq);
 	if((int)handler!=0)
 		irq_table[irq]=handler;
+	if(irq>7)//在从片的中断还要开启级连端口
+		enable_irq(CASCADE_IRQ);
 	enable_irq(irq);
 }
 

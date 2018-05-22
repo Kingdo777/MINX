@@ -5,6 +5,8 @@ global  disable_irq
 global  open_hardInt
 global  close_hardInt
 global  hltf
+global  port_read
+global  port_write
 
 ;void out_port(uint16_t port,uint8_t value)
 out_port:
@@ -126,3 +128,26 @@ close_hardInt:
         ret
 hltf:
         hlt
+; ========================================================================
+;                  void port_read(u16 port, void* buf, int n);
+; ========================================================================
+port_read:
+	mov	edx, [esp + 4]		; port
+	mov	edi, [esp + 4 + 4]	; buf
+	mov	ecx, [esp + 4 + 4 + 4]	; n
+	shr	ecx, 1
+	cld
+	rep	insw
+	ret
+
+; ========================================================================
+;                  void port_write(u16 port, void* buf, int n);
+; ========================================================================
+port_write:
+	mov	edx, [esp + 4]		; port
+	mov	esi, [esp + 4 + 4]	; buf
+	mov	ecx, [esp + 4 + 4 + 4]	; n
+	shr	ecx, 1
+	cld
+	rep	outsw
+	ret
