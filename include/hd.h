@@ -259,6 +259,9 @@ struct hd_info
 #define MAKE_DEVICE_REG(lba, drv, lba_highest) (((lba) << 6) | \
                                                 ((drv) << 4) | \
                                                 (lba_highest & 0xF) | 0xA0)
+#define	DRV_OF_DEV(dev) (dev <= MAX_PRIM ? \
+			 dev / NR_PRIM_PER_DRIVE : \
+			 (dev - MINOR_hd1a) / NR_SUB_PER_DRIVE)
 
 void init_hd();
 void hd_cmd_out(struct hd_cmd *cmd);
@@ -267,5 +270,13 @@ void interrupt_wait();
 void hd_identify(int drive);
 void print_identify_info(uint16_t *hdinfo);
 void hd_handler(int irq);
+void	hd_open			(int device);
+void	hd_close		(int device);
+void	hd_rdwt			(MESSAGE * p);
+void	hd_ioctl		(MESSAGE * p);
+void	hd_cmd_out		(struct hd_cmd* cmd);
+void	get_part_table		(int drive, int sect_nr, struct part_ent * entry);
+void	partition		(int device, int style);
+void print_hdinfo(struct hd_info * hdi);
 
 #endif /* _MINX_HD_H_ */

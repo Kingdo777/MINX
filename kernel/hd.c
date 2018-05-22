@@ -10,10 +10,12 @@
 #include "kliba.h"
 #include "ipc.h"
 #include "hd.h"
+#include "fs.h"
 #include "system_call.h"
 
 uint8_t hd_status;
 uint8_t hdbuf[SECTOR_SIZE * 2];
+struct hd_info	hd_info[1];
 
 /*****************************************************************************
  *                                task_hd
@@ -28,26 +30,37 @@ void task_hd()
 
     init_hd();
 
-    while (1)
-    {
-        send_recv(RECEIVE, ANY, &msg);
+    while (1) {
+		send_recv(RECEIVE, ANY, &msg);
 
-        int src = msg.source;
+		int src = msg.source;
 
-        switch (msg.type)
-        {
-        case DEV_OPEN:
-            hd_identify(0);
-            break;
+		switch (msg.type) {
+		case DEV_OPEN:
+			hd_open(msg.DEVICE);
+			break;
 
-        default:
-            dump_msg("HD driver::unknown msg", &msg);
-            spin("FS::main_loop (invalid msg.type)");
-            break;
-        }
+		case DEV_CLOSE:
+			hd_close(msg.DEVICE);
+			break;
 
-        send_recv(SEND, src, &msg);
-    }
+		case DEV_READ:
+		case DEV_WRITE:
+			hd_rdwt(&msg);
+			break;
+
+		case DEV_IOCTL:
+			hd_ioctl(&msg);
+			break;
+
+		default:
+			dump_msg("HD driver::unknown msg", &msg);
+			spin("FS::main_loop (invalid msg.type)");
+			break;
+		}
+
+		send_recv(SEND, src, &msg);
+	}
 }
 
 /*****************************************************************************
@@ -66,6 +79,255 @@ void init_hd()
 
     set_irq_table(AT_WINI_IRQ, hd_handler);//打开硬盘硬件中断
 
+}
+/*****************************************************************************
+ *                                hd_open
+ *****************************************************************************/
+/**
+ * <Ring 1> This routine handles DEV_OPEN message. It identify the drive
+ * of the given device and read the partition table of the drive if it
+ * has not been read.
+ * 
+ * @param device The device to be opened.
+ *****************************************************************************/
+void hd_open(int device)
+{
+	int drive = DRV_OF_DEV(device);
+	assert(drive == 0);	/* only one drive */
+
+	hd_identify(drive);
+
+	if (hd_info[drive].open_cnt++ == 0) {
+		partition(drive * (NR_PART_PER_DRIVE + 1), P_PRIMARY);
+		print_hdinfo(&hd_info[drive]);
+	}
+}
+
+/*****************************************************************************
+ *                                hd_close
+ *****************************************************************************/
+/**
+ * <Ring 1> This routine handles DEV_CLOSE message. 
+ * 
+ * @param device The device to be opened.
+ *****************************************************************************/
+void hd_close(int device)
+{
+	int drive = DRV_OF_DEV(device);
+	assert(drive == 0);	/* only one drive */
+
+	hd_info[drive].open_cnt--;
+}
+
+
+/*****************************************************************************
+ *                                hd_rdwt
+ *****************************************************************************/
+/**
+ * <Ring 1> This routine handles DEV_READ and DEV_WRITE message.
+ * 
+ * @param p Message ptr.
+ *****************************************************************************/
+void hd_rdwt(MESSAGE * p)
+{
+	int drive = DRV_OF_DEV(p->DEVICE);
+
+	uint64_t pos = p->POSITION;
+	assert((pos >> SECTOR_SIZE_SHIFT) < (1 << 31));
+
+	/**
+	 * We only allow to R/W from a SECTOR boundary:
+	 */
+	assert((pos & 0x1FF) == 0);
+
+	uint32_t sect_nr = (uint32_t)(pos >> SECTOR_SIZE_SHIFT); /* pos / SECTOR_SIZE */
+	int logidx = (p->DEVICE - MINOR_hd1a) % NR_SUB_PER_DRIVE;
+	sect_nr += p->DEVICE < MAX_PRIM ?
+		hd_info[drive].primary[p->DEVICE].base :
+		hd_info[drive].logical[logidx].base;
+
+	struct hd_cmd cmd;
+	cmd.features	= 0;
+	cmd.count	= (p->CNT + SECTOR_SIZE - 1) / SECTOR_SIZE;
+	cmd.lba_low	= sect_nr & 0xFF;
+	cmd.lba_mid	= (sect_nr >>  8) & 0xFF;
+	cmd.lba_high	= (sect_nr >> 16) & 0xFF;
+	cmd.device	= MAKE_DEVICE_REG(1, drive, (sect_nr >> 24) & 0xF);
+	cmd.command	= (p->type == DEV_READ) ? ATA_READ : ATA_WRITE;
+	hd_cmd_out(&cmd);
+
+	int bytes_left = p->CNT;
+	void * la =p->BUF;
+
+	while (bytes_left) {
+		int bytes = min(SECTOR_SIZE, bytes_left);
+		if (p->type == DEV_READ) {
+			interrupt_wait();
+			port_read(REG_DATA, hdbuf, SECTOR_SIZE);
+			memcpy(la, hdbuf, bytes);
+		}
+		else {
+			if (!waitfor(STATUS_DRQ, STATUS_DRQ, HD_TIMEOUT))
+				panic("hd writing error.");
+
+			port_write(REG_DATA, la, bytes);
+			interrupt_wait();
+		}
+		bytes_left -= SECTOR_SIZE;
+		la += SECTOR_SIZE;
+	}
+}															
+
+
+/*****************************************************************************
+ *                                hd_ioctl
+ *****************************************************************************/
+/**
+ * <Ring 1> This routine handles the DEV_IOCTL message.
+ * 
+ * @param p  Ptr to the MESSAGE.
+ *****************************************************************************/
+void hd_ioctl(MESSAGE * p)
+{
+	int device = p->DEVICE;
+	int drive = DRV_OF_DEV(device);
+
+	struct hd_info * hdi = &hd_info[drive];
+
+	if (p->REQUEST == DIOCTL_GET_GEO) {
+		void * dst = p->BUF;
+		void * src =device < MAX_PRIM ?&hdi->primary[device] :&hdi->logical[(device - MINOR_hd1a) %NR_SUB_PER_DRIVE];
+
+		memcpy(dst, src, sizeof(struct part_info));
+	}
+	else {
+		assert(0);
+	}
+}
+
+/*****************************************************************************
+ *                                get_part_table
+ *****************************************************************************/
+/**
+ * <Ring 1> Get a partition table of a drive.
+ * 
+ * @param drive   Drive nr (0 for the 1st disk, 1 for the 2nd, ...)n
+ * @param sect_nr The sector at which the partition table is located.
+ * @param entry   Ptr to part_ent struct.
+ *****************************************************************************/
+void get_part_table(int drive, int sect_nr, struct part_ent * entry)
+{
+	struct hd_cmd cmd;
+	cmd.features	= 0;
+	cmd.count	= 1;
+	cmd.lba_low	= sect_nr & 0xFF;
+	cmd.lba_mid	= (sect_nr >>  8) & 0xFF;
+	cmd.lba_high	= (sect_nr >> 16) & 0xFF;
+	cmd.device	= MAKE_DEVICE_REG(1, /* LBA mode*/
+					  drive,
+					  (sect_nr >> 24) & 0xF);
+	cmd.command	= ATA_READ;
+	hd_cmd_out(&cmd);
+	interrupt_wait();
+
+	port_read(REG_DATA, hdbuf, SECTOR_SIZE);
+	memcpy(entry,
+	       hdbuf + PARTITION_TABLE_OFFSET,
+	       sizeof(struct part_ent) * NR_PART_PER_DRIVE);
+}
+/*****************************************************************************
+ *                                print_hdinfo
+ *****************************************************************************/
+/**
+ * <Ring 1> Print disk info.
+ * 
+ * @param hdi  Ptr to struct hd_info.
+ *****************************************************************************/
+void print_hdinfo(struct hd_info * hdi)
+{
+	int i;
+	for (i = 0; i < NR_PART_PER_DRIVE + 1; i++) {
+		printl("%sPART_%d: base %d(%x), size %d(%x) (in sector)\n",
+		       i == 0 ? " " : "     ",
+		       i,
+		       hdi->primary[i].base,
+		       hdi->primary[i].base,
+		       hdi->primary[i].size,
+		       hdi->primary[i].size);
+	}
+	for (i = 0; i < NR_SUB_PER_DRIVE; i++) {
+		if (hdi->logical[i].size == 0)
+			continue;
+		printl("         "
+		       "%d: base %d(%x), size %d(%x) (in sector)\n",
+		       i,
+		       hdi->logical[i].base,
+		       hdi->logical[i].base,
+		       hdi->logical[i].size,
+		       hdi->logical[i].size);
+	}
+}
+/*****************************************************************************
+ *                                partition
+ *****************************************************************************/
+/**
+ * <Ring 1> This routine is called when a device is opened. It reads the
+ * partition table(s) and fills the hd_info struct.
+ * 
+ * @param device Device nr.
+ * @param style  P_PRIMARY or P_EXTENDED.
+ *****************************************************************************/
+void partition(int device, int style)
+{
+	int i;
+	int drive = DRV_OF_DEV(device);
+	struct hd_info * hdi = &hd_info[drive];
+
+	struct part_ent part_tbl[NR_SUB_PER_DRIVE];
+
+	if (style == P_PRIMARY) {
+		get_part_table(drive, drive, part_tbl);
+
+		int nr_prim_parts = 0;
+		for (i = 0; i < NR_PART_PER_DRIVE; i++) { /* 0~3 */
+			if (part_tbl[i].sys_id == NO_PART) 
+				continue;
+
+			nr_prim_parts++;
+			int dev_nr = i + 1;		  /* 1~4 */
+			hdi->primary[dev_nr].base = part_tbl[i].start_sect;
+			hdi->primary[dev_nr].size = part_tbl[i].nr_sects;
+
+			if (part_tbl[i].sys_id == EXT_PART) /* extended */
+				partition(device + dev_nr, P_EXTENDED);
+		}
+		assert(nr_prim_parts != 0);
+	}
+	else if (style == P_EXTENDED) {
+		int j = device % NR_PRIM_PER_DRIVE; /* 1~4 */
+		int ext_start_sect = hdi->primary[j].base;
+		int s = ext_start_sect;
+		int nr_1st_sub = (j - 1) * NR_SUB_PER_PART; /* 0/16/32/48 */
+
+		for (i = 0; i < NR_SUB_PER_PART; i++) {
+			int dev_nr = nr_1st_sub + i;/* 0~15/16~31/32~47/48~63 */
+
+			get_part_table(drive, s, part_tbl);
+
+			hdi->logical[dev_nr].base = s + part_tbl[0].start_sect;
+			hdi->logical[dev_nr].size = part_tbl[0].nr_sects;
+
+			s = ext_start_sect + part_tbl[1].start_sect;
+
+			/* no more logical partitions
+			   in this extended partition */
+			if (part_tbl[1].sys_id == NO_PART)
+				break;
+		}
+	}
+	else {
+		assert(0);
+	}
 }
 
 /*****************************************************************************

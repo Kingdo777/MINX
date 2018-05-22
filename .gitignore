@@ -1,5 +1,5 @@
 .vscode
-a.img
+*.img
 *.bin
 bochsout.txt
 *.o

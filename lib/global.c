@@ -3,6 +3,7 @@
 #include "process.h"
 #include "system_call.h"
 #include "tty.h"
+#include "fs.h"
 #include <stdint.h>
 
 void TestA();
@@ -68,3 +69,28 @@ CONSOLE console_table[NR_TTY];
 TTY *current_tty;
 
 uint8_t out_char_highLight=0x07;
+
+/* FS related below */
+/*****************************************************************************/
+/**
+ * For dd_map[k],
+ * `k' is the device nr.\ dd_map[k].driver_nr is the driver nr.
+ *
+ * Remeber to modify include/const.h if the order is changed.
+ *****************************************************************************/
+struct dev_drv_map dd_map[] = {
+	/* driver nr.		major device nr.
+	   ----------		---------------- */
+	{INVALID_DRIVER},	/**< 0 : Unused */
+	{INVALID_DRIVER},	/**< 1 : Reserved for floppy driver */
+	{INVALID_DRIVER},	/**< 2 : Reserved for cdrom driver */
+	{TASK_HD},		/**< 3 : Hard disk */
+	{TASK_TTY},		/**< 4 : TTY */
+	{INVALID_DRIVER}	/**< 5 : Reserved for scsi disk driver */
+};
+
+/**
+ * 6MB~7MB: buffer for FS
+ */
+uint8_t *		fsbuf		= (uint8_t*)0x600000;
+const int	FSBUF_SIZE	= 0x100000;

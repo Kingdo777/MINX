@@ -50,6 +50,13 @@ int vsprintf(char *buf,const char *fmt,va_list args){
                 p+=strlen(tmp);
                 next_arg+=4;
                 break;
+            case 'x':
+                itoa(*((int *)next_arg),tmp,16);
+                // itoa(15,tmp,10);
+                strcpy(p,tmp);
+                p+=strlen(tmp);
+                next_arg+=4;
+                break;
             case 'c':
                 *p++=*((char *)next_arg);
                 next_arg+=4;
