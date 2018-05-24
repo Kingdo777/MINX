@@ -1,7 +1,7 @@
 #include "const.h"
 #include "global.h"
 #include "keyboard.h"
-#include "mystring.h"
+#include "string.h"
 #include "tty.h"
 #include "kliba.h"
 

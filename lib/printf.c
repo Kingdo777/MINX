@@ -1,5 +1,5 @@
 #include "global.h"
-#include "mystring.h"
+#include "string.h"
 #include "const.h"
 #include "kliba.h"
 #include "system_call.h"

@@ -2,12 +2,13 @@
 #include "const.h"
 #include "protect.h"
 #include "tty.h"
-#include "mystring.h"
+#include "string.h"
 #include "process.h"
 #include "global.h"
 #include "ipc.h"
 #include "system_call.h"
 #include "kliba.h"
+#include "stdio.h"
 /*****************************************************************************
  *                                send_recv
  *****************************************************************************/

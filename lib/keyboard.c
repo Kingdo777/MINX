@@ -1,6 +1,6 @@
 #include "global.h"
 #include "kliba.h"
-#include "mystring.h"
+#include "string.h"
 #include "keyboard.h"
 #include <stdint.h>
 

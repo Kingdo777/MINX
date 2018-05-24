@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include "const.h"
 #include "protect.h"
-#include "mystring.h"
+#include "string.h"
 #include "process.h"
 #include "tty.h"
 #include "global.h"
@@ -12,6 +12,7 @@
 #include "hd.h"
 #include "fs.h"
 #include "system_call.h"
+#include "stdio.h"
 
 uint8_t hd_status;
 uint8_t hdbuf[SECTOR_SIZE * 2];
@@ -184,7 +185,9 @@ void hd_rdwt(MESSAGE * p)
  *****************************************************************************/
 /**
  * <Ring 1> This routine handles the DEV_IOCTL message.
- * 
+ *该函数用于处理类型为DEV_IOCTL的消息
+ *当消息的REQUEST为DIOCTL_GET_GEO，将返回指定硬盘设备的分区信息（base、size）
+ *接受参数有制定设备的次设备号，由于接受返回信息的buf（part_info *）
  * @param p  Ptr to the MESSAGE.
  *****************************************************************************/
 void hd_ioctl(MESSAGE * p)

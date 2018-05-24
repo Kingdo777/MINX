@@ -1,6 +1,6 @@
 #include    "const.h"
 #include    "protect.h"
-#include    "mystring.h"
+#include    "string.h"
 #include    "global.h"
 #include    <stdint.h>
 

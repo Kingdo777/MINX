@@ -1,23 +1,24 @@
 #include "const.h"
 #include "global.h"
-#include "mystring.h"
+#include "string.h"
 #include "process.h"
 #include "kliba.h"
 #include "ipc.h"
+#include "stdio.h"
 //此函数用于实现system_call_table中的函数
 int sys_get_ticks()
 {
 	return ticksCount;
 }
 
-void sys_write(uint32_t unused_var1, char *buf, int len, PCB *p)
-{
-	for (int i = 0; i < len; i++)
-	{
-		// putchar_c(current_tty,buf[i]);
-		putchar_c(p->tty, buf[i]);
-	}
-}
+// void sys_write(uint32_t unused_var1, char *buf, int len, PCB *p)
+// {
+// 	for (int i = 0; i < len; i++)
+// 	{
+// 		// putchar_c(current_tty,buf[i]);
+// 		putchar_c(p->tty, buf[i]);
+// 	}
+// }
 void sys_printx(uint32_t unused_var1, uint32_t unused_var2, char *s, PCB *pcb)
 {
 	const char *p;
@@ -119,4 +120,55 @@ int sys_sendrec(int ipc_type, int dest_process_pid, MESSAGE* m, PCB* p)
 	}
 
 	return 0;
+}
+
+/**
+* 下面的系统调用函数都是通过消息机制实现的
+*/
+/*****************************************************************************
+ *                                open
+ *****************************************************************************/
+/**
+ * open/create a file.
+ * 
+ * @param pathname  The full path of the file to be opened/created.
+ * @param flags     O_CREAT, O_RDWR, etc.
+ * 
+ * @return File descriptor if successful, otherwise -1.
+ *****************************************************************************/
+int open(const char *pathname, int flags)
+{
+	MESSAGE msg;
+
+	msg.type	= OPEN;
+
+	msg.PATHNAME	= (void*)pathname;
+	msg.FLAGS	= flags;
+	msg.NAME_LEN	= strlen(pathname);
+
+	send_recv(BOTH, TASK_FS, &msg);
+	assert(msg.type == SYSCALL_RET);
+
+	return msg.FD;
+}
+
+/*****************************************************************************
+ *                                close
+ *****************************************************************************/
+/**
+ * Close a file descriptor.
+ * 
+ * @param fd  File descriptor.
+ * 
+ * @return Zero if successful, otherwise -1.
+ *****************************************************************************/
+int close(int fd)
+{
+	MESSAGE msg;
+	msg.type   = CLOSE;
+	msg.FD     = fd;
+
+	send_recv(BOTH, TASK_FS, &msg);
+
+	return msg.RETVAL;
 }

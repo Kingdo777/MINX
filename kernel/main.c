@@ -1,5 +1,5 @@
 #include "kliba.h"
-#include "mystring.h"
+#include "string.h"
 #include "const.h"
 #include "global.h"
 #include "interrupt.h"
@@ -7,6 +7,7 @@
 #include "clock.h"
 #include "keyboard.h"
 #include "ipc.h"
+#include "stdio.h"
 
 void restart();
 void test_in_asm();
@@ -72,6 +73,10 @@ void kernelMain()
 
 void TestA()
 {
+    int fd = open("/blah",O_CREAT);
+    printf("fd:%d",fd);
+    close(fd);
+    spin("TestA()");
     // dump_proc(pcb_ptr);
     // printf("###%c%c%c###\n",'1','2','3');
     // printf("current_start_addr:%d\n",current_tty->p_console->current_start_addr);

@@ -3,7 +3,7 @@
 #include    "clock.h"
 #include    "const.h"
 #include    "global.h"
-#include    "mystring.h"
+#include    "string.h"
 #include    "ipc.h"
 #include    <stdint.h>
 

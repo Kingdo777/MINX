@@ -10,13 +10,14 @@ LD		=ld
 ASMFLAGS		= -I "boot/"
 ASMFLAGS_ELF	= -f elf
 LDFLAGS			= -s -Ttext 0x30400	-m elf_i386	
-CCFLAGS			= -m32	-c  -fno-builtin -fno-stack-protector -I "include/" -O0
+CCFLAGS			= -m32	-c  -fno-builtin -fno-stack-protector -I "include/" -I "include/sys/" -O0
 
 #This Program
 BOOT_TARGET		=	boot/boot.bin boot/loader.bin
 KERNEL_TARGET	=	kernel.bin
 OBJ_TARGET		=	kernel.o start.o mystring.o protect.o kliba.o interrupt.o mystring_c.o kliba_c.o main.o  test.o \
-global.o clock.o system_call.o system_call_asm.o process.o keyboard.o tty.o printf.o ipc.o hd.o fs/main.o
+global.o clock.o system_call.o system_call_asm.o process.o keyboard.o tty.o printf.o ipc.o hd.o fs/main.o fs/misc.o \
+fs/open.o
 #default starting positong
 everything:	$(BOOT_TARGET) $(KERNEL_TARGET)
 
@@ -44,65 +45,73 @@ kernel.bin:$(OBJ_TARGET)
 	$(LD)	$(LDFLAGS)	-o $@	$^
 kernel.o:kernel/kernel.asm
 	$(ASM)	$(ASMFLAGS_ELF)	-o $@	$<
-start.o: kernel/start.c include/const.h include/protect.h include/const.h \
- include/mystring.h include/interrupt.h include/global.h \
- include/protect.h include/process.h
+start.o: kernel/start.c include/sys/const.h include/sys/protect.h include/sys/const.h \
+ include/string.h include/sys/interrupt.h include/sys/global.h \
+ include/sys/protect.h include/sys/process.h
 	$(CC)	$(CCFLAGS)	-o $@	$<
 mystring.o:lib/mystring.asm
 	$(ASM)	$(ASMFLAGS_ELF)	-o $@	$<
-protect.o: lib/protect.c include/const.h include/protect.h \
- include/const.h include/mystring.h include/global.h include/protect.h \
- include/process.h
+protect.o: lib/protect.c include/sys/const.h include/sys/protect.h \
+ include/sys/const.h include/string.h include/sys/global.h include/sys/protect.h \
+ include/sys/process.h
 	$(CC)	$(CCFLAGS)	-o $@	$<
 kliba.o:lib/kliba.asm
 	$(ASM)	$(ASMFLAGS_ELF)	-o $@	$<
-interrupt.o: lib/interrupt.c include/const.h include/interrupt.h \
- include/kliba.h include/mystring.h include/global.h include/protect.h \
- include/const.h include/process.h
+interrupt.o: lib/interrupt.c include/sys/const.h include/sys/interrupt.h \
+ include/sys/kliba.h include/string.h include/sys/global.h include/sys/protect.h \
+ include/sys/const.h include/sys/process.h
 	$(CC)	$(CCFLAGS)	-o $@	$<
-mystring_c.o:lib/mystring_c.c include/const.h
+mystring_c.o:lib/mystring_c.c include/sys/const.h
 	$(CC)	$(CCFLAGS)	-o $@	$<
-kliba_c.o:lib/kliba.c include/system_call.h include/clock.h \
- include/const.h
+kliba_c.o:lib/kliba.c include/sys/system_call.h include/sys/clock.h \
+ include/sys/const.h
 	$(CC)	$(CCFLAGS)	-o $@	$<
-main.o: kernel/main.c include/kliba.h include/mystring.h include/const.h \
- include/global.h include/protect.h include/const.h include/process.h \
- include/interrupt.h include/system_call.h
+main.o: kernel/main.c include/sys/kliba.h include/string.h include/sys/const.h \
+ include/sys/global.h include/sys/protect.h include/sys/const.h include/sys/process.h \
+ include/sys/interrupt.h include/sys/system_call.h
 	$(CC)	$(CCFLAGS)	-o $@	$<
-global.o: lib/global.c include/const.h include/protect.h include/const.h \
- include/process.h include/protect.h
+global.o: lib/global.c include/sys/const.h include/sys/protect.h include/sys/const.h \
+ include/sys/process.h include/sys/protect.h
 	$(CC)	$(CCFLAGS)	-o $@	$<
-clock.o: lib/clock.c include/kliba.h include/global.h \
- include/protect.h include/const.h include/process.h include/clock.h
+clock.o: lib/clock.c include/sys/kliba.h include/sys/global.h \
+ include/sys/protect.h include/sys/const.h include/sys/process.h include/sys/clock.h
 	$(CC)	$(CCFLAGS)	-o $@	$<
-system_call.o: lib/system_call.c include/const.h include/global.h \
- include/protect.h include/const.h include/process.h
+system_call.o: lib/system_call.c include/sys/const.h include/sys/global.h \
+ include/sys/protect.h include/sys/const.h include/sys/process.h
 	$(CC)	$(CCFLAGS)	-o $@	$<
 system_call_asm.o:lib/system_call.asm
 	$(ASM)	$(ASMFLAGS_ELF)	-o $@	$<
-process.o:lib/process.c include/process.h include/protect.h \
- include/const.h include/global.h
+process.o:lib/process.c include/sys/process.h include/sys/protect.h \
+ include/sys/const.h include/sys/global.h
 	$(CC)	$(CCFLAGS)	-o $@	$<
-keyboard.o: lib/keyboard.c include/global.h include/protect.h \
- include/const.h include/process.h
+keyboard.o: lib/keyboard.c include/sys/global.h include/sys/protect.h \
+ include/sys/const.h include/sys/process.h
 	$(CC)	$(CCFLAGS)	-o $@	$<
-tty.o: kernel/tty.c include/global.h include/keyboard.h \
- include/const.h
+tty.o: kernel/tty.c include/sys/global.h include/sys/keyboard.h \
+ include/sys/const.h
 	$(CC)	$(CCFLAGS)	-o $@	$<
-printf.o: lib/printf.c include/global.h include/const.h
+printf.o: lib/printf.c include/sys/global.h include/sys/const.h
 	$(CC)	$(CCFLAGS)	-o $@	$<
-ipc.o: kernel/ipc.c include/const.h include/protect.h include/const.h \
- include/tty.h include/mystring.h include/tty.h include/process.h \
- include/protect.h include/global.h include/process.h include/ipc.h
+ipc.o: kernel/ipc.c include/sys/const.h include/sys/protect.h include/sys/const.h \
+ include/sys/tty.h include/string.h include/sys/tty.h include/sys/process.h \
+ include/sys/protect.h include/sys/global.h include/sys/process.h include/sys/ipc.h
 	$(CC)	$(CCFLAGS)	-o $@	$<
-hd.o: kernel/hd.c include/const.h include/protect.h include/const.h \
- include/mystring.h include/tty.h include/process.h include/protect.h \
- include/tty.h include/global.h include/process.h include/interrupt.h \
- include/clock.h include/hd.h
+hd.o: kernel/hd.c include/sys/const.h include/sys/protect.h include/sys/const.h \
+ include/string.h include/sys/tty.h include/sys/process.h include/sys/protect.h \
+ include/sys/tty.h include/sys/global.h include/sys/process.h include/sys/interrupt.h \
+ include/sys/clock.h include/sys/hd.h
 	$(CC)	$(CCFLAGS)	-o $@	$<
-fs/main.o: fs/main.c include/process.h include/protect.h include/const.h \
- include/tty.h include/kliba.h include/ipc.h include/process.h \
- include/const.h
+fs/main.o: fs/main.c include/sys/process.h include/sys/protect.h include/sys/const.h \
+ include/sys/tty.h include/sys/kliba.h include/sys/ipc.h include/sys/process.h \
+ include/sys/const.h
+	$(CC)	$(CCFLAGS)	-o $@	$<
+fs/misc.o: fs/misc.c include/sys/process.h include/sys/protect.h include/sys/const.h \
+ include/sys/tty.h include/sys/kliba.h include/sys/ipc.h include/sys/process.h \
+ include/sys/const.h
+	$(CC)	$(CCFLAGS)	-o $@	$<
+fs/open.o: fs/open.c include/sys/process.h include/sys/protect.h include/sys/const.h \
+ include/sys/tty.h include/sys/kliba.h include/sys/ipc.h include/sys/process.h \
+ include/sys/const.h
 	$(CC)	$(CCFLAGS)	-o $@	$<
 test.o:lib/test.c 
 	$(CC)	$(CCFLAGS)	-o $@	$<

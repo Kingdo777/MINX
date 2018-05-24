@@ -1,7 +1,7 @@
 #include	"const.h"
 #include	"interrupt.h"
 #include	"kliba.h"
-#include	"mystring.h"
+#include	"string.h"
 #include    "global.h"
 
 void hardWareInt_handler(int irq);

@@ -57,7 +57,7 @@ hwint_handler irq_table[NR_IRQ];
 
 system_call_var system_call_func_table[NR_SYS_CALL] = {
     sys_get_ticks,
-    sys_write,
+    // sys_write,
     sys_printx,
     sys_sendrec
 };
@@ -92,5 +92,12 @@ struct dev_drv_map dd_map[] = {
 /**
  * 6MB~7MB: buffer for FS
  */
-uint8_t *		fsbuf		= (uint8_t*)0x600000;
+uint8_t *	fsbuf	= (uint8_t*)0x600000;
 const int	FSBUF_SIZE	= 0x100000;
+
+struct file_desc	f_desc_table[NR_FILE_DESC];
+struct inode		inode_table[NR_INODE];
+struct super_block	super_block[NR_SUPER_BLOCK];
+MESSAGE			fs_msg;
+PCB *pcaller;
+struct inode *	root_inode;
