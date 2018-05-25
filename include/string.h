@@ -2,6 +2,7 @@
 #define _MINX_MYSTRING_H
 #include <stdint.h>
 #include "tty.h"
+typedef  char *     va_list;
 
 //字符串函数
 
@@ -30,15 +31,18 @@ void putchar_c(TTY *tty, char s);//由ttc.c中定义
 void putchar(char c);
 void puts(char *);
 
-uint32_t strlen(char *s);
+uint32_t strlen(const char *s);
 void strcpy(char *des,char *src);
 void strcat(char *des,char *src);
 
 int printf(const char*fmt,...);
 int sprintf(char *buf, const char *fmt, ...);
+int vsprintf(char *buf,const char *fmt,va_list args);
+
 
 void panic(const char *fmt, ...);
 
 int memcmp(const void * s1, const void *s2, int n);
 
+int strcmp(const char * s1, const char *s2);
 #endif

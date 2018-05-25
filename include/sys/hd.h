@@ -254,6 +254,9 @@ typedef struct hd_info
 #define ATA_IDENTIFY 0xEC
 #define ATA_READ 0x20
 #define ATA_WRITE 0x30
+
+#define MAX_IO_BYTES	256	/* how many sectors does one IO can handle */
+
 /* for DEVICE register. */
 #define MAKE_DEVICE_REG(lba, drv, lba_highest) (((lba) << 6) | \
                                                 ((drv) << 4) | \

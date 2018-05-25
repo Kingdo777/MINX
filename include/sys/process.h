@@ -74,6 +74,8 @@ typedef struct proc
 
     uint32_t pid;
 
+    char *name;
+
     /*消息机制相关*/
     int  p_flags;/*进程运行状态，值为0时表示可以被调度运行，值为其他是将被阻塞*/
 

@@ -5,6 +5,8 @@
 #include "kliba.h"
 #include "ipc.h"
 #include "stdio.h"
+#include "system_call.h"
+int disklog(char * logstr);
 //此函数用于实现system_call_table中的函数
 int sys_get_ticks()
 {
@@ -19,7 +21,7 @@ int sys_get_ticks()
 // 		putchar_c(p->tty, buf[i]);
 // 	}
 // }
-void sys_printx(uint32_t unused_var1, uint32_t unused_var2, char *s, PCB *pcb)
+int sys_printx(uint32_t unused_var1, uint32_t unused_var2, char *s, PCB *pcb)
 {
 	const char *p;
 	char ch;
@@ -69,7 +71,7 @@ void sys_printx(uint32_t unused_var1, uint32_t unused_var2, char *s, PCB *pcb)
 			putchar_c(pcb->tty, ch);
 		}
 	}
-	return;
+	return 0;
 }
 
 /*****************************************************************************
@@ -171,4 +173,133 @@ int close(int fd)
 	send_recv(BOTH, TASK_FS, &msg);
 
 	return msg.RETVAL;
+}
+/*****************************************************************************
+ *                                read
+ *****************************************************************************/
+/**
+ * Read from a file descriptor.
+ * 
+ * @param fd     File descriptor.
+ * @param buf    Buffer to accept the bytes read.
+ * @param count  How many bytes to read.
+ * 
+ * @return  On success, the number of bytes read are returned.
+ *          On error, -1 is returned.
+ *****************************************************************************/
+int read(int fd, void *buf, int count)
+{
+	MESSAGE msg;
+	msg.type = READ;
+	msg.FD   = fd;
+	msg.BUF  = buf;
+	msg.CNT  = count;
+
+	send_recv(BOTH, TASK_FS, &msg);
+
+	return msg.CNT;
+}
+
+/*****************************************************************************
+ *                                write
+ *****************************************************************************/
+/**
+ * Write to a file descriptor.
+ * 
+ * @param fd     File descriptor.
+ * @param buf    Buffer including the bytes to write.
+ * @param count  How many bytes to write.
+ * 
+ * @return  On success, the number of bytes written are returned.
+ *          On error, -1 is returned.
+ *****************************************************************************/
+int write(int fd, const void *buf, int count)
+{
+	MESSAGE msg;
+	msg.type = WRITE;
+	msg.FD   = fd;
+	msg.BUF  = (void*)buf;
+	msg.CNT  = count;
+
+	send_recv(BOTH, TASK_FS, &msg);
+
+	return msg.CNT;
+}
+/*****************************************************************************
+ *                                unlink
+ *****************************************************************************/
+/**
+ * Delete a file.
+ * 
+ * @param pathname  The full path of the file to delete.
+ * 
+ * @return Zero if successful, otherwise -1.
+ *****************************************************************************/
+int unlink(const char * pathname)
+{
+	MESSAGE msg;
+	msg.type   = UNLINK;
+
+	msg.PATHNAME	= (void*)pathname;
+	msg.NAME_LEN	= strlen(pathname);
+
+	send_recv(BOTH, TASK_FS, &msg);
+
+	return msg.RETVAL;
+}
+/*****************************************************************************
+ *                                syslog
+ *****************************************************************************/
+/**
+ * Write log directly to the disk by sending message to FS.
+ * 
+ * @param fmt The format string.
+ * 
+ * @return How many chars have been printed.
+ *****************************************************************************/
+int syslog(const char *fmt, ...)
+{
+	int i;
+	char buf[STR_DEFAULT_LEN];
+
+	va_list arg = (va_list)((char*)(&fmt) + 4); /**
+						     * 4: size of `fmt' in
+						     *    the stack
+						     */
+	i = vsprintf(buf, fmt, arg);
+	assert(strlen(buf) == i);
+
+	if (getCurrentPid() == TASK_FS) { /* in FS */
+		return disklog(buf);
+	}
+	else {			/* any proc which is not FS */
+		MESSAGE msg;
+		msg.type = DISK_LOG;
+		msg.BUF= buf;
+		msg.CNT = i;
+		send_recv(BOTH, TASK_FS, &msg);
+		if (i != msg.CNT) {
+			panic("failed to write log");
+		}
+
+		return msg.RETVAL;
+	}
+}
+/*****************************************************************************
+ *                                getCurrentPid
+ *****************************************************************************/
+/**
+ * Get the PID.
+ * 
+ * @return The PID.
+ *****************************************************************************/
+int getCurrentPid()
+{
+	MESSAGE msg;
+	msg.type	= GET_PID;
+
+	send_recv(BOTH, TASK_SYS, &msg);
+	assert(msg.type == SYSCALL_RET);
+
+	return msg.PID;
 }

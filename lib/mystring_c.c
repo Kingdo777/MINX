@@ -84,7 +84,7 @@ char *itoa(int num, char *str, int show_mode)
     *q++ = '\0';
     return str;
 }
-uint32_t strlen(char *s){
+uint32_t strlen(const char *s){
     int i=0;
     while(*s++)
         i++;
@@ -115,4 +115,21 @@ int memcmp(const void * s1, const void *s2, int n)
 		}
 	}
 	return 0;
+}
+int strcmp(const char * s1, const char *s2)
+{
+	if ((s1 == 0) || (s2 == 0)) { /* for robustness */
+		return (s1 - s2);
+	}
+
+	const char * p1 = s1;
+	const char * p2 = s2;
+
+	for (; *p1 && *p2; p1++,p2++) {
+		if (*p1 != *p2) {
+			break;
+		}
+	}
+
+	return (*p1 - *p2);
 }

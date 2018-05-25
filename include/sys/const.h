@@ -39,7 +39,7 @@
 
 
 typedef void  (*hwint_handler)(int irq);//硬件中断处理函数数组
-typedef void  (*system_call_var)();//硬件中断处理函数数组
+typedef int  (*system_call_var)();//硬件中断处理函数数组
 
 //下面两个常量应用在printx系统调用上面，其数值并不是关键，其镶嵌在字符串的第一个字符上面，printx会检查要打印字符串的第一个字符，若是这两个标志，将会进行特殊处理
 #define MAG_CH_PANIC 	1
@@ -97,10 +97,10 @@ enum msgtype {
 	HARD_INT = 1,
 
 	/* SYS task */
-	GET_TICKS,
+	GET_TICKS,GET_PID,
 
 	/* FS */
-	OPEN, CLOSE, READ, WRITE, LSEEK, STAT, UNLINK,
+	OPEN, CLOSE, READ, WRITE, LSEEK, STAT, UNLINK,DISK_LOG,
 
 	/* TTY, SYS, FS, MM, etc */
 	SYSCALL_RET,
