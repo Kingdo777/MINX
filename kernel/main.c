@@ -158,16 +158,43 @@ void TestA()
 
 void TestB()
 {
-    int i=0;    
+    char tty_name[] = "/dev_tty1";
+
+	int fd_stdin  = open(tty_name, O_RDWR);
+	assert(fd_stdin  == 0);
+	int fd_stdout = open(tty_name, O_RDWR);
+	assert(fd_stdout == 1);
+
+	char rdbuf[128];
+
+	while (1) {
+		write(fd_stdout, "$ ", 2);
+		int r = read(fd_stdin, rdbuf, 70);
+		rdbuf[r] = 0;
+
+		if (strcmp(rdbuf, "hello") == 0) {
+			write(fd_stdout, "hello world!\n", 13);
+		}
+		else {
+			if (rdbuf[0]) {
+				write(fd_stdout, "{", 1);
+				write(fd_stdout, rdbuf, r);
+				write(fd_stdout, "}\n", 2);
+			}
+		}
+	}
+
+	assert(0); /* never arrive here */
+    // int i=0;    
     // panic("TestB()");
     // assert(0);
-    while (i++<100)
-    {
-        set_out_char_highLight(5);        
+    // while (i++<100)
+    // {
+        // set_out_char_highLight(5);        
         // puts("B.");
         // delay(10);
-    }
-    while(1);    
+    // }
+    // while(1);    
 }
 
 void TestC()

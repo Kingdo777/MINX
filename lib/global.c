@@ -101,3 +101,4 @@ struct super_block	super_block[NR_SUPER_BLOCK];
 MESSAGE			fs_msg;
 PCB *pcaller;
 struct inode *	root_inode;
+int	key_pressed=0;

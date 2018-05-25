@@ -50,4 +50,5 @@ extern	MESSAGE			fs_msg;
 extern	PCB *	pcaller;
 extern	struct inode *	root_inode;
 
+extern	int	key_pressed;
 #endif

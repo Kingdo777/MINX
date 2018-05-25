@@ -3,11 +3,15 @@
 #include "process.h"
 #include "clock.h"
 #include "interrupt.h"
+#include "ipc.h"
 #include  <stdint.h>
 // 时钟中断处理程序
 void    clock_handler(int irq){
     ticksCount++;
     pcb_ptr->ticks--;
+    if(key_pressed){
+        inform_int(TASK_TTY);
+    }
     if(Int_reEnter!=0){
         return;
     }

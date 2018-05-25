@@ -173,6 +173,7 @@ void keyboard_handler(int irq)
             kb_buf.p_usable = kb_buf.buf;
         kb_buf.count++;
     }
+    key_pressed = 1;
 }
 
 void keyboard_read()

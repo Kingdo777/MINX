@@ -17,6 +17,20 @@ int printf(const char*fmt,...){
     len=vsprintf(buf,fmt,args);
     // write(buf,len);
     printx(buf);
+    // int c=write(1,buf,i);
+    return len;
+}
+/*======================================================================*
+                                 printl
+ *======================================================================*/
+int printl(const char*fmt,...){
+    int len;
+    char buf[1024];
+    va_list args=get_arg_list(fmt);
+    // putNum(args,16);
+    len=vsprintf(buf,fmt,args);
+    // write(buf,len);
+    printx(buf);
     return len;
 }
 /*======================================================================*

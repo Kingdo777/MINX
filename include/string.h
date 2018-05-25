@@ -36,6 +36,7 @@ void strcpy(char *des,char *src);
 void strcat(char *des,char *src);
 
 int printf(const char*fmt,...);
+int printl(const char*fmt,...);
 int sprintf(char *buf, const char *fmt, ...);
 int vsprintf(char *buf,const char *fmt,va_list args);
 

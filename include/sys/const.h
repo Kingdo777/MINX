@@ -46,7 +46,6 @@ typedef int  (*system_call_var)();//硬件中断处理函数数组
 #define MAG_CH_ASSERT 	2
 
 
-#define printl printf
 
 /* Color */
 /*
@@ -103,7 +102,7 @@ enum msgtype {
 	OPEN, CLOSE, READ, WRITE, LSEEK, STAT, UNLINK,DISK_LOG,
 
 	/* TTY, SYS, FS, MM, etc */
-	SYSCALL_RET,
+	SYSCALL_RET,SUSPEND_PROC, RESUME_PROC,
 
 	/* message type for drivers */
 	DEV_OPEN = 1001,

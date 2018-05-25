@@ -50,9 +50,9 @@ void task_fs()
 		case UNLINK:
 		fs_msg.RETVAL = do_unlink();
 		break;
-		/* case RESUME_PROC: */
-		/* 	src = fs_msg.PROC_NR; */
-		/* 	break; */
+		case RESUME_PROC:
+		src = fs_msg.PROC_NR;
+		break;
 		/* case FORK: */
 		/* 	fs_msg.RETVAL = fs_fork(); */
 		/* 	break; */
@@ -68,7 +68,7 @@ void task_fs()
 			break;
 		}
 
-		#ifdef ENABLE_DISK_LOG
+#ifdef ENABLE_DISK_LOG
 		int msgtype=fs_msg.type;
 		char * msg_name[128];
 		msg_name[OPEN]   = "OPEN";
@@ -103,8 +103,10 @@ void task_fs()
 #endif
 
 		/* reply */
-		fs_msg.type = SYSCALL_RET;
-		send_recv(SEND, src, &fs_msg);
+		if (fs_msg.type != SUSPEND_PROC) {
+			fs_msg.type = SYSCALL_RET;
+			send_recv(SEND, src, &fs_msg);
+		}
 	}
 }
 
