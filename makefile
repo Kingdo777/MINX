@@ -17,7 +17,7 @@ BOOT_TARGET		=	boot/boot.bin boot/loader.bin
 KERNEL_TARGET	=	kernel.bin
 OBJ_TARGET		=	kernel.o start.o mystring.o protect.o kliba.o interrupt.o mystring_c.o kliba_c.o main.o  test.o \
 global.o clock.o system_call.o system_call_asm.o process.o keyboard.o tty.o printf.o ipc.o hd.o fs/main.o fs/misc.o \
-fs/open.o fs/read_write.o fs/link.o fs/disklog.o
+fs/open.o fs/read_write.o fs/link.o fs/disklog.o mm/main.o mm/fork.o
 #default starting positong
 everything:	$(BOOT_TARGET) $(KERNEL_TARGET)
 
@@ -122,6 +122,14 @@ fs/link.o: fs/link.c include/sys/process.h include/sys/protect.h include/sys/con
  include/sys/const.h
 	$(CC)	$(CCFLAGS)	-o $@	$<
 fs/disklog.o: fs/disklog.c include/sys/process.h include/sys/protect.h include/sys/const.h \
+ include/sys/tty.h include/sys/kliba.h include/sys/ipc.h include/sys/process.h \
+ include/sys/const.h
+	$(CC)	$(CCFLAGS)	-o $@	$<
+mm/main.o: mm/main.c include/sys/process.h include/sys/protect.h include/sys/const.h \
+ include/sys/tty.h include/sys/kliba.h include/sys/ipc.h include/sys/process.h \
+ include/sys/const.h
+	$(CC)	$(CCFLAGS)	-o $@	$<
+mm/fork.o: fs/fork.c include/sys/process.h include/sys/protect.h include/sys/const.h \
  include/sys/tty.h include/sys/kliba.h include/sys/ipc.h include/sys/process.h \
  include/sys/const.h
 	$(CC)	$(CCFLAGS)	-o $@	$<

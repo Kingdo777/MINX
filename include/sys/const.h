@@ -6,8 +6,9 @@
 #define LDT_SIZE        1
 #define IDT_SIZE        256
 #define TASK_STACK_SIZE 4 * 1024
-#define NR_TASK         4
-#define NR_USER_PROCESS 3
+#define NR_TASK         5
+#define NR_USER_PROCESS 4
+#define NR_MAX_USER_PROCESS 32//可容纳的最大用户进程数
 #define NR_IRQ          16
 #define NR_SYS_CALL     3
 #define NR_TTY          2
@@ -80,9 +81,13 @@ typedef int  (*system_call_var)();//硬件中断处理函数数组
 #define RECEIVE		2
 #define BOTH		3	/* BOTH = (SEND | RECEIVE) */
 
-/* Process flags*/
+/* Process */
 #define SENDING   0x02	/* set when proc trying to send */
 #define RECEIVING 0x04	/* set when proc trying to recv */
+#define WAITING   0x08	/* set when proc waiting for the child to terminate */
+#define HANGING   0x10	/* set when proc exits without being waited by parent */
+#define FREE_SLOT 0x20	/* set when proc table entry is not used
+			 * (ok to allocated to a new process)
 
 /**
  * @enum msgtype
@@ -96,13 +101,22 @@ enum msgtype {
 	HARD_INT = 1,
 
 	/* SYS task */
-	GET_TICKS,GET_PID,
+	GET_TICKS, GET_PID, GET_RTC_TIME,
 
 	/* FS */
-	OPEN, CLOSE, READ, WRITE, LSEEK, STAT, UNLINK,DISK_LOG,
+	OPEN, CLOSE, READ, WRITE, LSEEK, STAT, UNLINK,
+
+	/* FS & TTY */
+	SUSPEND_PROC, RESUME_PROC,
+
+	/* MM */
+	EXEC, WAIT,
+
+	/* FS & MM */
+	FORK, EXIT,
 
 	/* TTY, SYS, FS, MM, etc */
-	SYSCALL_RET,SUSPEND_PROC, RESUME_PROC,
+	SYSCALL_RET,
 
 	/* message type for drivers */
 	DEV_OPEN = 1001,
@@ -111,11 +125,13 @@ enum msgtype {
 	DEV_WRITE,
 	DEV_IOCTL
 };
+
 /* macros for messages */
 #define	FD		u.m3.m3i1
 #define	PATHNAME	u.m3.m3p1
 #define	FLAGS		u.m3.m3i1
 #define	NAME_LEN	u.m3.m3i2
+#define	BUF_LEN		u.m3.m3i3
 #define	CNT		u.m3.m3i2
 #define	REQUEST		u.m3.m3i2
 #define	PROC_NR		u.m3.m3i3
@@ -126,7 +142,6 @@ enum msgtype {
 #define	WHENCE		u.m3.m3i3
 
 #define	PID		u.m3.m3i2
-#define	STATUS		u.m3.m3i1
 #define	RETVAL		u.m3.m3i1
 #define	STATUS		u.m3.m3i1
 

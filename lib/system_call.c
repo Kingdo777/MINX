@@ -257,6 +257,16 @@ int unlink(const char * pathname)
  * 
  * @return How many chars have been printed.
  *****************************************************************************/
+/*****************************************************************************
+ *                                syslog
+ *****************************************************************************/
+/**
+ * Write log directly to the disk by sending message to FS.
+ * 
+ * @param fmt The format string.
+ * 
+ * @return How many chars have been printed.
+ *****************************************************************************/
 int syslog(const char *fmt, ...)
 {
 	int i;
@@ -269,21 +279,7 @@ int syslog(const char *fmt, ...)
 	i = vsprintf(buf, fmt, arg);
 	assert(strlen(buf) == i);
 
-	if (getCurrentPid() == TASK_FS) { /* in FS */
-		return disklog(buf);
-	}
-	else {			/* any proc which is not FS */
-		MESSAGE msg;
-		msg.type = DISK_LOG;
-		msg.BUF= buf;
-		msg.CNT = i;
-		send_recv(BOTH, TASK_FS, &msg);
-		if (i != msg.CNT) {
-			panic("failed to write log");
-		}
-
-		return msg.RETVAL;
-	}
+	return disklog(buf);
 }
 /*****************************************************************************
  *                                getCurrentPid
@@ -300,6 +296,30 @@ int getCurrentPid()
 
 	send_recv(BOTH, TASK_SYS, &msg);
 	assert(msg.type == SYSCALL_RET);
+
+	return msg.PID;
+}
+
+/*****************************************************************************
+ *                                fork
+ *****************************************************************************/
+/**
+ * Create a child process, which is actually a copy of the caller.
+ * 
+ * @return   On success, the PID of the child process is returned in the
+ *         parent's thread of execution, and a 0 is returned in the child's
+ *         thread of execution.
+ *           On failure, a -1 will be returned in the parent's context, no
+ *         child process will be created.
+ *****************************************************************************/
+int fork()
+{
+	MESSAGE msg;
+	msg.type = FORK;
+
+	send_recv(BOTH, TASK_MM, &msg);
+	assert(msg.type == SYSCALL_RET);
+	assert(msg.RETVAL == 0);
 
 	return msg.PID;
 }

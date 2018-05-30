@@ -16,8 +16,11 @@ void kernelMain()
 {
     PCB *p;
     char tmp[256]="\0";
-    for (int i = 0; i < NR_TASK+NR_USER_PROCESS; i++)
+    for (int i = 0; i < NR_TASK+NR_MAX_USER_PROCESS; i++)
     {
+        if(i>=NR_TASK+NR_USER_PROCESS){
+            p->p_flags=-1;
+        }
         p = &pcb_table[i];
         p->ldt_sel = SELECTOR_LDT;
         p->pid = i;
@@ -74,65 +77,85 @@ void kernelMain()
         ;
 }
 
+void Init()
+{
+	int fd_stdin  = open("/dev_tty0", O_RDWR);
+	assert(fd_stdin  == 0);
+	int fd_stdout = open("/dev_tty0", O_RDWR);
+	assert(fd_stdout == 1);
+
+	printf("Init() is running ...\n");
+
+	int pid = fork();
+	if (pid != 0) { /* parent process */
+		printf("parent is running, child pid:%d\n", pid);
+		spin("parent");
+	}
+	else {	/* child process */
+		printf("child is running, pid:%d\n", getCurrentPid());
+		spin("child");
+	}
+}
+
 void TestA()
 {
-    int fd;
-	int i, n;
+    // int fd;
+	// int i, n;
 
-	char filename[MAX_FILENAME_LEN+1] = "blah";
-	const char bufw[] = "abcde";
-	const int rd_bytes = 3;
-	char bufr[rd_bytes];
+	// char filename[MAX_FILENAME_LEN+1] = "blah";
+	// const char bufw[] = "abcde";
+	// const int rd_bytes = 3;
+	// char bufr[rd_bytes];
 
-	assert(rd_bytes <= strlen(bufw));
+	// assert(rd_bytes <= strlen(bufw));
 
-	/* create */
-	fd = open(filename, O_CREAT | O_RDWR);
-	assert(fd != -1);
-	printf("File created: %s (fd %d)\n", filename, fd);
+	// /* create */
+	// fd = open(filename, O_CREAT | O_RDWR);
+	// assert(fd != -1);
+	// printf("File created: %s (fd %d)\n", filename, fd);
 
-	/* write */
-	n = write(fd, bufw, strlen(bufw));
-	assert(n == strlen(bufw));
+	// /* write */
+	// n = write(fd, bufw, strlen(bufw));
+	// assert(n == strlen(bufw));
 
-	/* close */
-	close(fd);
+	// /* close */
+	// close(fd);
 
-	/* open */
-	fd = open(filename, O_RDWR);
-	assert(fd != -1);
-	printf("File opened. fd: %d\n", fd);
+	// /* open */
+	// fd = open(filename, O_RDWR);
+	// assert(fd != -1);
+	// printf("File opened. fd: %d\n", fd);
 
-	/* read */
-	n = read(fd, bufr, rd_bytes);
-	assert(n == rd_bytes);
-	bufr[n] = 0;
-	printf("%d bytes read: %s\n", n, bufr);
+	// /* read */
+	// n = read(fd, bufr, rd_bytes);
+	// assert(n == rd_bytes);
+	// bufr[n] = 0;
+	// printf("%d bytes read: %s\n", n, bufr);
 
-	/* close */
-	close(fd);
+	// /* close */
+	// close(fd);
 
-	char * filenames[] = {"/foo", "/bar", "/baz"};
+	// char * filenames[] = {"/foo", "/bar", "/baz"};
 
-	/* create files */
-	for (i = 0; i < sizeof(filenames) / sizeof(filenames[0]); i++) {
-		fd = open(filenames[i], O_CREAT | O_RDWR);
-		assert(fd != -1);
-		printf("File created: %s (fd %d)\n", filenames[i], fd);
-		close(fd);
-	}
+	// /* create files */
+	// for (i = 0; i < sizeof(filenames) / sizeof(filenames[0]); i++) {
+	// 	fd = open(filenames[i], O_CREAT | O_RDWR);
+	// 	assert(fd != -1);
+	// 	printf("File created: %s (fd %d)\n", filenames[i], fd);
+	// 	close(fd);
+	// }
 
-	char * rfilenames[] = {"/bar", "/foo", "/baz", "/dev_tty0"};
+	// char * rfilenames[] = {"/bar", "/foo", "/baz", "/dev_tty0"};
 
-	/* remove files */
-	for (i = 0; i < sizeof(rfilenames) / sizeof(rfilenames[0]); i++) {
-		if (unlink(rfilenames[i]) == 0)
-			printf("File removed: %s\n", rfilenames[i]);
-		else
-			printf("Failed to remove file: %s\n", rfilenames[i]);
-	}
+	// /* remove files */
+	// for (i = 0; i < sizeof(rfilenames) / sizeof(rfilenames[0]); i++) {
+	// 	if (unlink(rfilenames[i]) == 0)
+	// 		printf("File removed: %s\n", rfilenames[i]);
+	// 	else
+	// 		printf("Failed to remove file: %s\n", rfilenames[i]);
+	// }
 
-	spin("TestA");
+	// spin("TestA");
 
     
     // dump_proc(pcb_ptr);
@@ -153,38 +176,38 @@ void TestA()
         // puts("A.");
         // delay(10);
     // }
-    // while(1);
+    while(1);
 }
 
 void TestB()
 {
-    char tty_name[] = "/dev_tty1";
+    // char tty_name[] = "/dev_tty1";
 
-	int fd_stdin  = open(tty_name, O_RDWR);
-	assert(fd_stdin  == 0);
-	int fd_stdout = open(tty_name, O_RDWR);
-	assert(fd_stdout == 1);
+	// int fd_stdin  = open(tty_name, O_RDWR);
+	// assert(fd_stdin  == 0);
+	// int fd_stdout = open(tty_name, O_RDWR);
+	// assert(fd_stdout == 1);
 
-	char rdbuf[128];
+	// char rdbuf[128];
 
-	while (1) {
-		write(fd_stdout, "$ ", 2);
-		int r = read(fd_stdin, rdbuf, 70);
-		rdbuf[r] = 0;
+	// while (1) {
+	// 	write(fd_stdout, "$ ", 2);
+	// 	int r = read(fd_stdin, rdbuf, 70);
+	// 	rdbuf[r] = 0;
 
-		if (strcmp(rdbuf, "hello") == 0) {
-			write(fd_stdout, "hello world!\n", 13);
-		}
-		else {
-			if (rdbuf[0]) {
-				write(fd_stdout, "{", 1);
-				write(fd_stdout, rdbuf, r);
-				write(fd_stdout, "}\n", 2);
-			}
-		}
-	}
+	// 	if (strcmp(rdbuf, "hello") == 0) {
+	// 		write(fd_stdout, "hello world!\n", 13);
+	// 	}
+	// 	else {
+	// 		if (rdbuf[0]) {
+	// 			write(fd_stdout, "{", 1);
+	// 			write(fd_stdout, rdbuf, r);
+	// 			write(fd_stdout, "}\n", 2);
+	// 		}
+	// 	}
+	// }
 
-	assert(0); /* never arrive here */
+	// assert(0); /* never arrive here */
     // int i=0;    
     // panic("TestB()");
     // assert(0);
@@ -194,18 +217,18 @@ void TestB()
         // puts("B.");
         // delay(10);
     // }
-    // while(1);    
+    while(1);    
 }
 
 void TestC()
 {
-    int i=0;
-    while (i++<100)
-    {
-        set_out_char_highLight(6);        
-        // puts("C.");
-        // delay(10);
-    }
+    // int i=0;
+    // while (i++<100)
+    // {
+    //     set_out_char_highLight(6);        
+    //     // puts("C.");
+    //     // delay(10);
+    // }
     while(1);    
 }
 void task_sys(){

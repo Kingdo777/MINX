@@ -69,7 +69,6 @@ void task_fs()
 		}
 
 #ifdef ENABLE_DISK_LOG
-		int msgtype=fs_msg.type;
 		char * msg_name[128];
 		msg_name[OPEN]   = "OPEN";
 		msg_name[CLOSE]  = "CLOSE";
@@ -82,20 +81,20 @@ void task_fs()
 		/* msg_name[STAT]   = "STAT"; */
 
 		switch (msgtype) {
+		case UNLINK:
+			dump_fd_graph("%s just finished. (pid:%d)",
+				      msg_name[msgtype], src);
+			//panic("");
 		case OPEN:
 		case CLOSE:
 		case READ:
 		case WRITE:
-		/* case FORK: */
-			dump_fd_graph("%s just finished.", msg_name[msgtype]);
-			panic("");
+		case FORK:
+		case EXIT:
 		/* case LSEEK: */
-		case UNLINK:
-		/* case EXIT: */
 		/* case STAT: */
 			break;
-		/* case RESUME_PROC: */
-		case DISK_LOG:
+		case RESUME_PROC:
 			break;
 		default:
 			assert(0);

@@ -98,6 +98,7 @@ typedef struct proc
 typedef struct{
     uint32_t eip;
     uint32_t topOfStack;
+    char *name;
 }TASK;
 
 typedef struct

@@ -13,6 +13,8 @@ void task_tty();
 void task_sys();
 void task_hd();
 void task_fs();
+void Init();
+void task_mm();
 
 void test_in_asmA();
 void test_in_asmB();
@@ -31,26 +33,30 @@ TSS tss;
 char task_stack_A[TASK_STACK_SIZE];
 char task_stack_B[TASK_STACK_SIZE];
 char task_stack_C[TASK_STACK_SIZE];
+char task_stack_Init[TASK_STACK_SIZE];
 char task_stack_tty[TASK_STACK_SIZE];
 char task_stack_sys[TASK_STACK_SIZE];
 char task_stack_hd[TASK_STACK_SIZE];
 char task_stack_fs[TASK_STACK_SIZE];
+char task_stack_mm[TASK_STACK_SIZE];
 
 uint32_t Int_reEnter;
 
 TASK task[NR_TASK] = 
 {
-    {(uint32_t)task_tty, (uint32_t)task_stack_tty + TASK_STACK_SIZE},
-    {(uint32_t)task_sys, (uint32_t)task_stack_sys + TASK_STACK_SIZE},
-    {(uint32_t)task_hd, (uint32_t)task_stack_hd + TASK_STACK_SIZE},
-    {(uint32_t)task_fs, (uint32_t)task_stack_fs + TASK_STACK_SIZE}
+    {(uint32_t)task_tty, (uint32_t)task_stack_tty + TASK_STACK_SIZE,"TTY"},
+    {(uint32_t)task_sys, (uint32_t)task_stack_sys + TASK_STACK_SIZE,"SYS"},
+    {(uint32_t)task_hd, (uint32_t)task_stack_hd + TASK_STACK_SIZE,"HD"},
+    {(uint32_t)task_fs, (uint32_t)task_stack_fs + TASK_STACK_SIZE,"FS"},
+    {(uint32_t)task_mm, (uint32_t)task_stack_mm + TASK_STACK_SIZE,"MM"}
 };
 
 TASK user_process[NR_USER_PROCESS]=
 {
-  {(uint32_t)TestA, (uint32_t)task_stack_A + TASK_STACK_SIZE},
-  {(uint32_t)TestB, (uint32_t)task_stack_B + TASK_STACK_SIZE},
-  {(uint32_t) TestC, (uint32_t)task_stack_C + TASK_STACK_SIZE}
+  {(uint32_t)TestA, (uint32_t)task_stack_A + TASK_STACK_SIZE,"TestA"},
+  {(uint32_t)TestB, (uint32_t)task_stack_B + TASK_STACK_SIZE,"TestB"},
+  {(uint32_t) TestC, (uint32_t)task_stack_C + TASK_STACK_SIZE,"TestC"},
+  {(uint32_t) Init, (uint32_t)task_stack_Init + TASK_STACK_SIZE,"Init"}
 };
 
 hwint_handler irq_table[NR_IRQ];

@@ -21,4 +21,5 @@ int write(int fd, const void *buf, int count);
 int unlink(const char * pathname);
 int syslog(const char *fmt, ...);
 int getCurrentPid();
+int fork();
 #endif
